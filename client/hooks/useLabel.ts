@@ -1,5 +1,5 @@
-import { Dataset, Row, RSS, Token } from "@/types";
-import { useCallback, useEffect, useState } from "react";
+import { Dataset, Label, LabelStat, Row, RSS, Token } from "@/types";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function useLabel(id: string) {
 	const [keys, setKeys] = useState<string[]>([]);
@@ -62,10 +62,49 @@ export default function useLabel(id: string) {
 		},
 		[parseRows]
 	);
+	const getLabelStats = (
+		rows: Record<string, RSS>,
+		labels: Label[],
+		unlabeledName = "Unlabeled",
+		unlabeledColor = "#9CA3AF",
+		fallbackColor = "#A78BFA"
+	): LabelStat[] => {
+		const counts = new Map<string, number>();
+		for (const k of Object.keys(rows)) {
+			const raw = (rows[k]._label ?? "").trim();
+			const key = raw || unlabeledName;
+			counts.set(key, (counts.get(key) ?? 0) + 1);
+		}
 
+		const stats: LabelStat[] = labels.map((l) => ({
+			label: l.name,
+			count: counts.get(l.name) ?? 0,
+			color: l.color,
+		}));
+
+		const known = new Set(labels.map((l) => l.name));
+		for (const [key, count] of counts) {
+			if (!known.has(key) && key !== unlabeledName) {
+				stats.push({ label: key, count, color: fallbackColor });
+			}
+		}
+
+		stats.push({
+			label: unlabeledName,
+			count: counts.get(unlabeledName) ?? 0,
+			color: unlabeledColor,
+		});
+
+		return stats;
+	};
+    
 	useEffect(() => {
 		loadDatasetAndConfig(id);
 	}, [id, loadDatasetAndConfig]);
+	const stats = useMemo(
+		() => getLabelStats(rows, dataset?.labels ?? []),
+		[rows, dataset?.labels]
+	);
 
 	const updateLabel = async ({
 		rowId,
@@ -111,6 +150,7 @@ export default function useLabel(id: string) {
 
 			console.log(newRow);
 			setRows((prev) => ({ ...prev, [k]: newRow }));
+			setCurrentIndex((p) => Math.min(p + 1, keys.length - 1));
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -160,6 +200,7 @@ export default function useLabel(id: string) {
 	return {
 		keys,
 		rows,
+		stats,
 		currentIndex,
 		setCurrentIndex,
 		isLoading,
@@ -167,5 +208,6 @@ export default function useLabel(id: string) {
 		updateLabel,
 		tokens,
 		exportCSV,
+		getLabelStats,
 	};
 }

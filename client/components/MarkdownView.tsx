@@ -12,9 +12,11 @@ import { Token } from "@/types";
 export default function MarkdownViewer({
 	markdown,
 	tokens = [{ pattern: "", color: "" }],
+	highlight = true,
 }: {
 	markdown: string;
 	tokens?: Token[];
+	highlight?: boolean;
 }) {
 	return (
 		<div className="bg-gray-900 flex-1 min-w-0 dark:prose-invert px-2 whitespace-normal break-all rounded-r-md">
@@ -24,7 +26,7 @@ export default function MarkdownViewer({
 					rehypeRaw,
 					rehypeSanitize,
 					rehypeHighlight,
-					rehypeKeywordHighlight(tokens),
+					highlight ? rehypeKeywordHighlight(tokens) : () => {},
 				]}
 			>
 				{markdown}

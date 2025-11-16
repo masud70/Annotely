@@ -23,8 +23,8 @@ export default function ConfigurePage() {
 		selectedFile,
 		setSelectedFile,
 		saveConfig,
-		labels,
-		setLabels,
+		inputLabels,
+		setInputLabels,
 	} = useConfig(id);
 
 	return (
@@ -151,8 +151,8 @@ export default function ConfigurePage() {
 					<div className="mb-1">Dataset Labels</div>
 					<Textarea
 						placeholder="Write your dataset labels separated by comma (,)"
-						value={labels}
-						onChange={(e) => setLabels(e.target.value)}
+						value={inputLabels}
+						onChange={(e) => setInputLabels(e.target.value)}
 					/>
 				</div>
 

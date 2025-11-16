@@ -1,4 +1,5 @@
-import { Dataset, RSU } from "@/types";
+import { getColors } from "@/lib/utils";
+import { Dataset, Label } from "@/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -8,9 +9,10 @@ export const useConfig = (id: string) => {
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 	const [highlightColor, setHighlightColor] = useState<string>();
 	const [selectedFile, setSelectedFile] = useState<number>();
-	const [keywords, setKeywords] = useState<string | undefined>(undefined);
+	const [keywords, setKeywords] = useState<string>("");
 	const [keyColumn, setKeyColumn] = useState<string | undefined>(undefined);
-	const [labels, setLabels] = useState<string>("");
+	const [labels, setLabels] = useState<Label[]>([]);
+	const [inputLabels, setInputLabels] = useState<string>("");
 	const router = useRouter();
 	const highlightColors = [
 		"#A0DF05",
@@ -41,12 +43,15 @@ export const useConfig = (id: string) => {
 			}
 
 			const json = await res.json();
-			setDataset(json?.data ?? []);
-			setSelectedColumns(json?.data.selectedColumns ?? []);
-			setHighlightColor(json?.data.highlightColor ?? "#FA0");
-			setKeywords(json?.data.keywords ?? undefined);
-			setLabels(json?.data.labels.map((l: RSU) => l.name));
-			setKeyColumn(json?.data.keyColumn);
+			const data: Dataset = json.data;
+
+			setDataset(data ?? []);
+			setSelectedColumns(data.selectedColumns ?? []);
+			setHighlightColor(data.highlightColor ?? "#FA0");
+			setKeywords(data.keywords.join(", "));
+			setLabels(data.labels);
+			setKeyColumn(data.keyColumn);
+			setInputLabels(data.labels.map((l) => l.name).join(", "));
 			console.log(json);
 		} catch (error) {
 			console.log(error);
@@ -70,8 +75,8 @@ export const useConfig = (id: string) => {
 						highlightColor,
 						keyColumn,
 						configured: true,
-						keywords: normKeywords(keywords),
-						labels: normLabels(labels),
+						keywords: keywords.trim().split(","),
+						labels: normLabels(inputLabels),
 					}),
 				}
 			);
@@ -90,19 +95,15 @@ export const useConfig = (id: string) => {
 		}
 	};
 
-	const normKeywords = (v: string | string[] | undefined): string[] => {
-		if (Array.isArray(v)) return [...new Set(v)];
-		if (typeof v === "string") return [...new Set(v.split(","))];
-		else return [];
-	};
-
-	const normLabels = (v: string | string[]): { name: string }[] => {
-		if (Array.isArray(v)) return v.map((l) => ({ name: l }));
-		if (typeof v === "string")
-			return [...new Set(v.split(",").map((s) => s.trim()))].map(
-				(name) => ({ name })
-			);
-		else return [];
+	const normLabels = (v: string): Label[] => {
+		const colors = getColors(v.length);
+		return v
+			.trim()
+			.split(",")
+			.map((l, idx) => ({
+				name: l,
+				color: colors[idx],
+			}));
 	};
 
 	return {
@@ -122,5 +123,7 @@ export const useConfig = (id: string) => {
 		saveConfig,
 		labels,
 		setLabels,
+		inputLabels,
+		setInputLabels,
 	};
 };

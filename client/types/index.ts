@@ -10,9 +10,15 @@ export type FileSummary = {
 	configured: boolean;
 };
 
+export type LabelStat = {
+	label: string;
+	color: string;
+	count: number;
+};
+
 export type Label = {
-	id: number;
-	fileId: number;
+	id?: number;
+	fileId?: number;
 	name: string;
 	color: string;
 };
