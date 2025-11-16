@@ -5,11 +5,14 @@ import { PlayIcon } from "@/components/ui/icons/akar-icons-play";
 import useLabel from "@/hooks/useLabel";
 import { useParams } from "next/navigation";
 import { ExportDataset } from "@/components/ExportDataset";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 const LabelDataset = () => {
 	const { id } = useParams<{ id: string }>();
 	const [open, setOpen] = useState(false);
+	const listRef = useRef<HTMLDivElement | null>(null);
+	const selectedItemRef = useRef<HTMLDivElement | null>(null);
 	const {
 		dataset,
 		rows,
@@ -20,15 +23,27 @@ const LabelDataset = () => {
 		tokens,
 	} = useLabel(id);
 
+	useEffect(() => {
+		// Smoothly ensure the selected item is visible
+		selectedItemRef.current?.scrollIntoView({
+			block: "nearest",
+			behavior: "smooth",
+		});
+	}, [currentIndex, keys.length]);
+
 	return (
 		<div className="w-full flex h-full">
 			<div className="min-w-[150px] shrink-0 h-full bg-gray-600 flex flex-col">
 				<div className="bg-gray-800 w-full items-center flex justify-center min-h-[40px] max-h-[40px]">
-					ID
+					Key Column
 				</div>
+				{/* Values for key column */}
 				<div className="overflow-y-auto">
 					{keys.map((key, index) => (
 						<div
+							ref={
+								index === currentIndex ? selectedItemRef : null
+							}
 							onClick={() => setCurrentIndex(index)}
 							key={index}
 							className={`w-full text-center border-y p-2 cursor-pointer duration-300 hover:bg-gray-500 ${
@@ -58,7 +73,7 @@ const LabelDataset = () => {
 							setOpen={setOpen}
 							open={open}
 						/>
-						<div>Exit</div>
+						<Link href={"/"}>Exit</Link>
 					</div>
 				</div>
 				<div className="w-auto h-[calc(100vh-190px)] overflow-y-auto p-1">

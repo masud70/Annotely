@@ -10,7 +10,9 @@ const Navbar = () => {
 
 	return (
 		<div className="h-[50px] w-full border-b-2 bg-gray-500 dark:bg-gray-800 flex justify-between items-center py-2 px-4 fixed">
-			<Link href={'/'} className="font-bold text-xl">Label Data</Link>
+			<Link href={"/"} className="font-bold text-xl">
+				{process.env.NEXT_PUBLIC_APP_NAME}
+			</Link>
 			<div>
 				<Button
 					variant="ghost"
