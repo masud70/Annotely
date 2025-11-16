@@ -1,4 +1,5 @@
 export type RSS = Record<string, string>;
+export type RSU = Record<string, unknown>;
 
 export type FileSummary = {
 	id: number;
@@ -7,6 +8,13 @@ export type FileSummary = {
 	uploadedAt: string;
 	updatedAt: string;
 	configured: boolean;
+};
+
+export type Label = {
+	id: number;
+	fileId: number;
+	name: string;
+	color: string;
 };
 
 export type Row = {
@@ -28,10 +36,7 @@ export type Dataset = {
 	selectedColumns: string[];
 	configured: boolean;
 	keyColumn: string;
-	labels: {
-		name: string;
-		color: string;
-	}[];
+	labels: Label[];
 	_count: {
 		row: number;
 	};

@@ -2,7 +2,6 @@
 
 import CheckboxItem from "@/components/checkboxItem";
 import { Checkbox } from "@/components/ui/checkbox";
-import Loader from "@/components/ui/Loader";
 import { Textarea } from "@/components/ui/textarea";
 import { useConfig } from "@/hooks/useConfig";
 import { useParams } from "next/navigation";
@@ -112,7 +111,11 @@ export default function ConfigurePage() {
 								Choose index column
 							</option>
 							{selectedColumns.map((c, idx) => (
-								<option key={idx} value={c}>
+								<option
+									key={idx}
+									value={c}
+									selected={c === keyColumn}
+								>
 									{c}
 								</option>
 							))}
@@ -171,7 +174,6 @@ export default function ConfigurePage() {
 					Save and Proceed
 				</button>
 			</div>
-			<Loader show={isLoading} text="Loading data..." />
 		</div>
 	);
 }

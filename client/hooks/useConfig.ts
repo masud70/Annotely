@@ -1,4 +1,5 @@
-import { Dataset } from "@/types";
+import { Dataset, RSU } from "@/types";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export const useConfig = (id: string) => {
@@ -10,6 +11,7 @@ export const useConfig = (id: string) => {
 	const [keywords, setKeywords] = useState<string | undefined>(undefined);
 	const [keyColumn, setKeyColumn] = useState<string | undefined>(undefined);
 	const [labels, setLabels] = useState<string>("");
+	const router = useRouter();
 	const highlightColors = [
 		"#A0DF05",
 		"#B000D0",
@@ -43,6 +45,8 @@ export const useConfig = (id: string) => {
 			setSelectedColumns(json?.data.selectedColumns ?? []);
 			setHighlightColor(json?.data.highlightColor ?? "#FA0");
 			setKeywords(json?.data.keywords ?? undefined);
+			setLabels(json?.data.labels.map((l: RSU) => l.name));
+			setKeyColumn(json?.data.keyColumn);
 			console.log(json);
 		} catch (error) {
 			console.log(error);
@@ -54,6 +58,8 @@ export const useConfig = (id: string) => {
 	const saveConfig = async () => {
 		setIsLoading(true);
 		try {
+			console.log("KW:", keywords);
+			console.log("L:", labels);
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_BASE_URL}/dataset/config/${id}`,
 				{
@@ -63,9 +69,9 @@ export const useConfig = (id: string) => {
 						selectedColumns,
 						highlightColor,
 						keyColumn,
-                        configured: true,
-						keywords: keywords?.split(",") || [],
-						labels: labels.split(",").map((l) => ({ name: l })),
+						configured: true,
+						keywords: normKeywords(keywords),
+						labels: normLabels(labels),
 					}),
 				}
 			);
@@ -76,11 +82,27 @@ export const useConfig = (id: string) => {
 			}
 			const json = await res.json();
 			console.log(json);
+			router.push(`/dataset/label/${id}`);
 		} catch (error) {
 			console.log(error);
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const normKeywords = (v: string | string[] | undefined): string[] => {
+		if (Array.isArray(v)) return [...new Set(v)];
+		if (typeof v === "string") return [...new Set(v.split(","))];
+		else return [];
+	};
+
+	const normLabels = (v: string | string[]): { name: string }[] => {
+		if (Array.isArray(v)) return v.map((l) => ({ name: l }));
+		if (typeof v === "string")
+			return [...new Set(v.split(",").map((s) => s.trim()))].map(
+				(name) => ({ name })
+			);
+		else return [];
 	};
 
 	return {

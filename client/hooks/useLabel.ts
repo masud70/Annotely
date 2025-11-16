@@ -1,5 +1,5 @@
 import { Dataset, Row, RSS, Token } from "@/types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function useLabel(id: string) {
 	const [keys, setKeys] = useState<string[]>([]);
@@ -9,43 +9,7 @@ export default function useLabel(id: string) {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [tokens, setTokens] = useState<Token[]>([]);
 
-	useEffect(() => {
-		loadDatasetAndConfig(id);
-	}, [id]);
-
-	const loadDatasetAndConfig = async (id: string) => {
-		setIsLoading(true);
-		try {
-			// Load row
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_BASE_URL}/label/${id}`,
-				{
-					method: "GET",
-					cache: "no-store",
-				}
-			);
-			const { ok, ...data }: { ok: boolean; data: Dataset } =
-				await res.json();
-
-			if (!ok) {
-				throw new Error("Failed loading dataset");
-			}
-			setDataset(data.data ?? undefined);
-			parseRows(data.data.keyColumn, data.data!);
-			setTokens(
-				data.data.keywords.map((t) => ({
-					pattern: t,
-					color: data.data.highlightColor,
-				}))
-			);
-		} catch (error) {
-			console.log(error);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	const parseRows = (keyCol: string, dSet: Dataset) => {
+	const parseRows = useCallback((keyCol: string, dSet: Dataset) => {
 		const out: Record<string, RSS> = {};
 
 		for (const r of dSet?.rows || []) {
@@ -54,13 +18,54 @@ export default function useLabel(id: string) {
 
 			if (!keyVal) continue;
 
-			const { [keyCol]: _omit, ...rest } = rec;
+			const rest: RSS = { ...rec };
+			delete rest[keyCol];
+
 			const k = String(keyVal);
 			out[k] = { ...rest, rowId: String(r.id), _label: r.label };
 		}
 		setKeys(Object.keys(out));
 		setRows(out);
-	};
+	}, []);
+
+	const loadDatasetAndConfig = useCallback(
+		async (id: string) => {
+			setIsLoading(true);
+			try {
+				// Load row
+				const res = await fetch(
+					`${process.env.NEXT_PUBLIC_BASE_URL}/label/${id}`,
+					{
+						method: "GET",
+						cache: "no-store",
+					}
+				);
+				const { ok, ...data }: { ok: boolean; data: Dataset } =
+					await res.json();
+
+				if (!ok) {
+					throw new Error("Failed loading dataset");
+				}
+				setDataset(data.data ?? undefined);
+				parseRows(data.data.keyColumn, data.data!);
+				setTokens(
+					data.data.keywords.map((t) => ({
+						pattern: t,
+						color: data.data.highlightColor,
+					}))
+				);
+			} catch (error) {
+				console.log(error);
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[parseRows]
+	);
+
+	useEffect(() => {
+		loadDatasetAndConfig(id);
+	}, [id, loadDatasetAndConfig]);
 
 	const updateLabel = async ({
 		rowId,
@@ -94,7 +99,9 @@ export default function useLabel(id: string) {
 			const keyVal = rec[keyCol];
 			if (!keyVal) throw new Error(`Key "${keyCol}" missing in row data`);
 
-			const { [keyCol]: _omit, ...rest } = rec;
+			const rest: RSS = { ...rec };
+			delete rest[keyCol];
+
 			const k = String(keyVal);
 			const newRow: RSS = {
 				...rest,

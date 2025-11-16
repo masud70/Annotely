@@ -11,7 +11,6 @@ import Link from "next/link";
 const LabelDataset = () => {
 	const { id } = useParams<{ id: string }>();
 	const [open, setOpen] = useState(false);
-	const listRef = useRef<HTMLDivElement | null>(null);
 	const selectedItemRef = useRef<HTMLDivElement | null>(null);
 	const {
 		dataset,
