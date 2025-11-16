@@ -1,0 +1,19 @@
+// ./server/tsconfig.json
+{
+	"compilerOptions": {
+		"target": "ES2020",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"outDir": "dist",
+		"allowJs": true,
+		"allowArbitraryExtensions": false,
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
+		"sourceMap": true
+	},
+	"include": ["src"]
+}

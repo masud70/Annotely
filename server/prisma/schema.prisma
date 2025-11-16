@@ -1,0 +1,49 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model File {
+    id              Int      @id @default(autoincrement())
+    fileName        String // stored filename (on disk)
+    keywords        Json // string[]
+    fileType        String // "csv" | "json" | "parquet" | "unknown"
+    lastUpdatedRow  Int? // row index last touched (optional)
+    columns         Json // string[]
+    keyColumn       String?
+    selectedColumns Json // string[]
+    highlightColor  String   @default("#DEAF05")
+    configured      Boolean  @default(false)
+    uploadedAt      DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    // Relations
+    labels Label[] // 1 -> many
+    rows   Row[] // 1 -> many
+}
+
+model Label {
+    id     Int     @id @default(autoincrement())
+    fileId Int
+    name   String
+    color  String?
+
+    file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+    @@unique([fileId, name])
+}
+
+model Row {
+    id       Int     @id @default(autoincrement())
+    fileId   Int
+    rowIndex Int
+    data     Json
+    label    String?
+    file     File    @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+    @@unique([fileId, rowIndex])
+}
