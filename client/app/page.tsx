@@ -1,12 +1,12 @@
 "use client";
 import Loader from "@/components/ui/Loader";
+import UploadsTable from "@/components/UploadsTable";
+import useUpload from "@/hooks/useUpload";
 import {
 	Dropzone,
 	DropzoneContent,
 	DropzoneEmptyState,
 } from "@/components/ui/shadcn-io/dropzone";
-import UploadsTable from "@/components/UploadsTable";
-import useUpload from "@/hooks/useUpload";
 
 export default function Home() {
 	const { uploading, files, uploaded, gettingFiles, handleDrop } =
@@ -26,7 +26,7 @@ export default function Home() {
 				onDrop={handleDrop}
 				onError={console.error}
 				src={files}
-				className="w-[90%] h-[250px] bg-gray-600 rounded-lg flex items-center justify-center"
+				className="w-[90%] h-[250px] bg-gray-400 rounded-lg flex items-center justify-center"
 			>
 				<DropzoneEmptyState />
 				<DropzoneContent />

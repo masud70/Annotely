@@ -31,6 +31,7 @@ export default function useUpload() {
 			}
 
 			const json = await res.json();
+            console.log(json)
 			setUploaded(json?.data ?? []);
 			console.log(json);
 		} catch (e) {

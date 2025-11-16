@@ -59,11 +59,11 @@ export default function ConfigurePage() {
 						</button>
 					</div>
 				</div>
-				<div className="border rounded-md p-2 grid gap-2">
+				<div className="border border-gray-400 rounded-md p-2 grid gap-2">
 					<div className="flex justify-between">
 						<div className="mb-1">Select columns</div>
 						<div className="flex items-center space-x-2">
-							<Checkbox
+							<Checkbox className="border-gray-400 data-[state=checked]:bg-blue-600/60"
 								onClick={() =>
 									setSelectedColumns((p) => {
 										const all = dataset?.columns ?? [];
@@ -77,7 +77,7 @@ export default function ConfigurePage() {
 									(dataset?.columns ?? []).length
 								}
 							/>
-							<p>Select all</p>
+							<p className="mb-0.5">Select all</p>
 						</div>
 					</div>
 					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
@@ -153,6 +153,7 @@ export default function ConfigurePage() {
 						placeholder="Write your dataset labels separated by comma (,)"
 						value={inputLabels}
 						onChange={(e) => setInputLabels(e.target.value)}
+                        className="bg-white"
 					/>
 				</div>
 
@@ -162,6 +163,7 @@ export default function ConfigurePage() {
 						placeholder="Write your keywords separated by comma (,) or regular expressions..."
 						value={keywords}
 						onChange={(e) => setKeywords(e.target.value)}
+                        className="bg-white"
 					/>
 				</div>
 			</div>
@@ -169,7 +171,7 @@ export default function ConfigurePage() {
 				<button
 					disabled={isLoading}
 					onClick={saveConfig}
-					className="px-2 py-2 rounded border bg-green-700 text-white disabled:opacity-50 min-w-[120px]"
+					className="px-2 py-1 rounded border bg-gray-700/40 hover:bg-gray-700 text-white disabled:opacity-50 min-w-[120px]"
 				>
 					Save and Proceed
 				</button>

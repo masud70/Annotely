@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExternalLink, LucideHighlighter, SaveIcon } from "lucide-react";
+import { scrollbar } from "@/lib/utils";
 
 const LabelDataset = () => {
 	const { id } = useParams<{ id: string }>();
@@ -34,13 +35,13 @@ const LabelDataset = () => {
 	}, [currentIndex, keys.length]);
 
 	return (
-		<div className="w-full flex h-full">
-			<div className="min-w-[150px] shrink-0 h-full bg-gray-600 flex flex-col">
-				<div className="bg-gray-800 w-full items-center flex justify-center min-h-[40px] max-h-[40px]">
+		<div className="w-full flex h-full bg-gray-300 dark:bg-gray-800">
+			<div className="min-w-[150px] shrink-0 h-full  flex flex-col">
+				<div className="bg-transparent w-full items-center flex justify-center min-h-[40px] max-h-[40px] border-y-2 border-gray-400">
 					Key Column
 				</div>
 				{/* Values for key column */}
-				<div className="overflow-y-auto">
+				<div className={"overflow-y-auto" + scrollbar}>
 					{keys.map((key, index) => (
 						<div
 							ref={
@@ -48,8 +49,10 @@ const LabelDataset = () => {
 							}
 							onClick={() => setCurrentIndex(index)}
 							key={index}
-							className={`w-full text-center border-y p-2 cursor-pointer duration-300 hover:bg-gray-500 ${
-								index === currentIndex ? "bg-gray-400" : ""
+							className={`w-full text-center border-y border-gray-400 p-2 cursor-pointer duration-300 dark:hover:bg-gray-400 hover:bg-gray-500 ${
+								index === currentIndex
+									? "bg-gray-600 text-white dark:bg-gray-300 dark:text-black"
+									: "bg-gray-200 dark:bg-gray-700"
 							}`}
 						>
 							{key}
@@ -57,11 +60,11 @@ const LabelDataset = () => {
 					))}
 				</div>
 			</div>
-			<div className="flex-1 min-w-0 bg-gray-700 isolate">
-				<div className="w-full bg-gray-800 h-[40px] items-center flex justify-between px-2 space-x-2 relative z-50">
+			<div className="flex-1 min-w-0 bg-transparent isolate">
+				<div className="w-full bg-transparent h-[40px] items-center flex justify-between px-2 space-x-2 relative z-50 border-y-2 border-gray-400">
 					<div className="min-w-[80px] flex gap-1">
 						Row:{" "}
-						<p className="bg-gray-700 px-1 rounded-md">{`${
+						<p className="bg-gray-400 dark:bg-gray-700 px-1 rounded-md">{`${
 							currentIndex + 1
 						}/${keys.length}`}</p>
 					</div>
@@ -69,6 +72,7 @@ const LabelDataset = () => {
 						{stats.map((s, id) => (
 							<div
 								key={id}
+								title={s.label}
 								className="flex space-x-1 items-center justify-center bg-gray-500/20 rounded px-1.5"
 							>
 								<div
@@ -104,7 +108,12 @@ const LabelDataset = () => {
 						</Link>
 					</div>
 				</div>
-				<div className="w-auto h-[calc(100vh-190px)] overflow-y-auto p-1 relative z-0">
+				<div
+					className={
+						"w-auto h-[calc(100vh-190px)] overflow-y-auto px-1 relative z-0" +
+						scrollbar
+					}
+				>
 					<div className="grid grid-cols-[auto_1fr] w-full gap-y-0.5">
 						{keys.length > 0 && dataset?.selectedColumns
 							? Object.keys(rows[keys[currentIndex]] ?? {}).map(
@@ -114,7 +123,7 @@ const LabelDataset = () => {
 											"_label",
 										].includes(k) ? (
 											<>
-												<div className="min-w-[60px] shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-500 p-1">
+												<div className="min-w-[60px] shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-300 dark:bg-gray-700 p-1">
 													{k}
 												</div>
 												<MarkdownViewer
@@ -132,12 +141,12 @@ const LabelDataset = () => {
 							: null}
 					</div>
 				</div>
-				<div className="h-[100px] p-2 items-center bg-gray-800 flex flex-col">
+				<div className="h-[100px] p-2 items-center border-t-2 border-gray-400 flex flex-col">
 					<div className="flex-1 items-center justify-center space-x-2 overflow-x-auto">
 						{dataset?.labels.map((l, idx) => (
 							<Button
 								key={idx}
-								className="border py-1 px-4 cursor-pointer"
+								className="border-2 py-1 px-4 cursor-pointer"
 								variant={"ghost"}
 								style={{ backgroundColor: l.color }}
 								onClick={() =>
@@ -155,7 +164,7 @@ const LabelDataset = () => {
 					</div>
 					<div className="flex items-center justify-center space-x-2 overflow-x-auto mt-2">
 						<Button
-							className="border p-2 space-x-[-10px] cursor-pointer"
+							className="border-2 border-gray-400 p-2 space-x-[-10px] cursor-pointer"
 							variant={"ghost"}
 							onClick={() => setCurrentIndex(0)}
 						>
@@ -163,7 +172,7 @@ const LabelDataset = () => {
 							<PlayIcon className="rotate-180" />
 						</Button>
 						<Button
-							className="border p-2 cursor-pointer"
+							className="border-2 border-gray-400 p-2 cursor-pointer"
 							variant={"ghost"}
 							onClick={() =>
 								setCurrentIndex((p) => Math.max(p - 1, 0))
@@ -172,7 +181,7 @@ const LabelDataset = () => {
 							<PlayIcon className="rotate-180" />
 						</Button>
 						<Button
-							className="border p-2 cursor-pointer"
+							className="border-2 border-gray-400 p-2 cursor-pointer"
 							variant={"ghost"}
 							onClick={() =>
 								setCurrentIndex((p) =>
@@ -183,7 +192,7 @@ const LabelDataset = () => {
 							<PlayIcon />
 						</Button>
 						<Button
-							className="border p-2 space-x-[-10px] cursor-pointer"
+							className="border-2 border-gray-400 p-2 space-x-[-10px] cursor-pointer"
 							variant={"ghost"}
 							onClick={() => setCurrentIndex(keys.length - 1)}
 						>

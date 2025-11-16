@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin 'tailwind-scrollbar';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -76,6 +77,30 @@
   --sidebar-accent-foreground: oklch(0.21 0.034 264.665);
   --sidebar-border: oklch(0.928 0.006 264.531);
   --sidebar-ring: oklch(0.707 0.022 261.325);
+}
+/* 1) Firefox */
+.myScroll {
+  overflow: auto;                 /* or overflow-y:auto */
+  scrollbar-width: thin;          /* auto | thin | none */
+  scrollbar-color: #7c3aed #1f2937; /* thumb track */
+}
+
+/* 2) Chromium/Safari (WebKit/Blink) */
+.myScroll::-webkit-scrollbar {
+  width: 10px;                    /* vertical bar width */
+  height: 10px;                   /* horizontal bar height */
+}
+.myScroll::-webkit-scrollbar-track {
+  background: #1f2937;            /* track color */
+  border-radius: 8px;
+}
+.myScroll::-webkit-scrollbar-thumb {
+  background: #7c3aed;            /* thumb color */
+  border-radius: 8px;
+  border: 2px solid #1f2937;      /* creates padding gap */
+}
+.myScroll::-webkit-scrollbar-thumb:hover {
+  background: #8b5cf6;
 }
 
 .dark {

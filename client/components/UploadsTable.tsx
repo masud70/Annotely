@@ -12,9 +12,9 @@ export default function UploadsTable({
 	loading?: boolean;
 }) {
 	return (
-		<div className="w-full rounded-lg overflow-hidden border border-gray-300 dark:border-gray-700">
+		<div className="w-full rounded-lg overflow-hidden border border-gray-400 dark:border-gray-700">
 			{/* Header */}
-			<div className="grid grid-cols-[10%_45%_15%_15%_15%] bg-gray-100 dark:bg-gray-800 px-3 py-2 text-sm font-medium">
+			<div className="grid grid-cols-[10%_45%_15%_15%_15%] bg-gray-400 dark:bg-gray-800 px-3 py-2 text-sm font-medium">
 				<div>#</div>
 				<div>Name</div>
 				<div className="text-center">Rows</div>
@@ -46,7 +46,7 @@ export default function UploadsTable({
 									: `/dataset/label/${f.id}`
 							}
 							key={`${f.fileName}-${i}`}
-							className="grid items-center grid-cols-[10%_45%_15%_15%_15%] px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/60 text-sm"
+							className="grid items-center grid-cols-[10%_45%_15%_15%_15%] border-b border-gray-400 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/60 text-sm"
 						>
 							<div>{i + 1}</div>
 							<div className="truncate" title={f.fileName}>
@@ -68,7 +68,7 @@ export default function UploadsTable({
 								<Link
 									href={`/dataset/label/${f.id}`}
 									className="border rounded-md p-1 bg-green-600"
-									hidden={f.configured}
+									hidden={!f.configured}
 								>
 									Select
 								</Link>

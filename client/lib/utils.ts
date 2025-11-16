@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-
+export const scrollbar =
+	" scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar scrollbar-thumb-slate-600 scrollbar-track-slate-300 scrollbar-thin";
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }

@@ -19,7 +19,7 @@ export default function MarkdownViewer({
 	highlight?: boolean;
 }) {
 	return (
-		<div className="bg-gray-900 flex-1 min-w-0 dark:prose-invert px-2 whitespace-normal break-all rounded-r-md">
+		<div className="bg-gray-200 dark:bg-gray-900/80 flex-1 min-w-0 dark:prose-invert px-2 whitespace-normal break-all">
 			<ReactMarkdown
 				remarkPlugins={[remarkGfm]}
 				rehypePlugins={[
