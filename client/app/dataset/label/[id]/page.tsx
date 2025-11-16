@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@/components/ui/icons/akar-icons-play";
 import useLabel from "@/hooks/useLabel";
 import { useParams } from "next/navigation";
+import { ExportDataset } from "@/components/ExportDataset";
+import { useState } from "react";
 
-const Label = () => {
+const LabelDataset = () => {
 	const { id } = useParams<{ id: string }>();
+	const [open, setOpen] = useState(false);
 	const {
 		dataset,
 		rows,
@@ -42,12 +45,24 @@ const Label = () => {
 					<div>Row: {`${currentIndex + 1}/${keys.length}`}</div>
 					<div className="flex space-x-4">
 						<div>Highlight</div>
-						<div>Save</div>
+						<button onClick={() => setOpen(true)}>
+							Export file
+						</button>
+						<ExportDataset
+							fileId={Number(id)}
+							allColumns={dataset?.columns || []}
+							suggestedRange={{
+								start: 0,
+								end: Object.keys(rows).length,
+							}}
+							setOpen={setOpen}
+							open={open}
+						/>
 						<div>Exit</div>
 					</div>
 				</div>
 				<div className="w-auto h-[calc(100vh-190px)] overflow-y-auto p-1">
-					<div className="grid grid-cols-[auto_1fr] w-full gap-y-1">
+					<div className="grid grid-cols-[auto_1fr] w-full gap-y-0.5">
 						{keys.length > 0 && dataset?.selectedColumns
 							? Object.keys(rows[keys[currentIndex]] ?? {}).map(
 									(k) =>
@@ -56,22 +71,15 @@ const Label = () => {
 											"_label",
 										].includes(k) ? (
 											<>
-												<div className="min-w-[60px] shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-500 p-1 rounded-l-md">
+												<div className="min-w-[60px] shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-500 p-1">
 													{k}
 												</div>
-												{/* <pre className="bg-gray-900 p-1 rounded-r-md">
-													{
-														rows[
-															keys[currentIndex]
-														][k]
-													}
-												</pre> */}
 												<MarkdownViewer
 													tokens={tokens}
 													markdown={
 														rows[
 															keys[currentIndex]
-														][k] ?? "# No content"
+														][k] ?? ""
 													}
 												/>
 											</>
@@ -145,4 +153,4 @@ const Label = () => {
 	);
 };
 
-export default Label;
+export default LabelDataset;

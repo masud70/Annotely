@@ -69,6 +69,51 @@ export const datasetController = {
 			next(e);
 		}
 	},
+
+	exportFile: async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const id = Number(req.params.id);
+			const { columns, start, end } = req.body as {
+				columns: string[];
+				start: number;
+				end: number;
+			};
+
+			if (!Number.isFinite(id))
+				return res
+					.status(400)
+					.json({ ok: false, error: "Invalid dataset id" });
+			if (!Array.isArray(columns) || !columns.length)
+				return res
+					.status(400)
+					.json({ ok: false, error: "columns[] required" });
+			if (
+				!Number.isFinite(start) ||
+				!Number.isFinite(end) ||
+				start < 0 ||
+				end < start
+			)
+				return res
+					.status(400)
+					.json({ ok: false, error: "Invalid start/end" });
+
+			const { filename, csv } = await datasetService.exportAsCSV({
+				fileId: id,
+				columns,
+				start,
+				end,
+			});
+
+			res.setHeader("Content-Type", "text/csv; charset=utf-8");
+			res.setHeader(
+				"Content-Disposition",
+				`attachment; filename="${filename}"`
+			);
+			res.status(200).send(csv);
+		} catch (error) {
+			next(error);
+		}
+	},
 };
 
 export async function getAllUploads(

@@ -18,6 +18,10 @@ function chunk<T>(arr: T[], size = 1000): T[][] {
 	for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
 	return out;
 }
+const esc = (v: unknown) => {
+	const s = v == null ? "" : String(v);
+	return /[,"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
 
 export const datasetService = {
 	saveDataset: async ({
@@ -73,7 +77,7 @@ export const datasetService = {
 					fileName: true,
 					uploadedAt: true,
 					updatedAt: true,
-                    configured: true,
+					configured: true,
 					_count: { select: { rows: true } },
 				},
 				orderBy: { uploadedAt: "desc" },
@@ -148,6 +152,51 @@ export const datasetService = {
 			});
 
 			return updated;
+		} catch (error) {
+			throw error;
+		}
+	},
+
+	exportAsCSV: async ({
+		fileId,
+		columns,
+		start,
+		end,
+	}: {
+		fileId: number;
+		columns: string[];
+		start: number;
+		end: number;
+	}) => {
+		try {
+			const file = await db.file.findUniqueOrThrow({
+				where: { id: fileId },
+				select: { fileName: true },
+			});
+
+			const rows = await db.row.findMany({
+				where: { fileId, rowIndex: { gte: start, lt: end } },
+				orderBy: { rowIndex: "asc" },
+				select: { data: true, rowIndex: true, label: true },
+			});
+
+			const cols = [...columns, "_label"];
+
+			const header = cols.map(esc).join(",") + "\r\n";
+			const body = rows
+				.map((r) => {
+					const rec = r.data as Record<string, unknown>;
+					const line = columns.map((c) => esc(rec?.[c]));
+					// push label column
+					line.push(esc(r.label ?? ""));
+					return line.join(",");
+				})
+				.join("\r\n");
+
+			const csv = header + body + (body ? "\r\n" : "");
+			const base = file.fileName.replace(/\.[^.]+$/, "");
+			const filename = `${base}_rows_${start}-${end}.csv`;
+			return { filename, csv };
 		} catch (error) {
 			throw error;
 		}

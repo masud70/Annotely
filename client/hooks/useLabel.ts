@@ -111,6 +111,45 @@ export default function useLabel(id: string) {
 		}
 	};
 
+	const exportCSV = async ({
+		fileId,
+		selected,
+		start,
+		end,
+	}: {
+		fileId: number;
+		selected: string[];
+		start: number;
+		end: number;
+	}) => {
+		try {
+			const res = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/dataset/export/${fileId}`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ columns: selected, start, end }),
+				}
+			);
+			if (!res.ok) {
+				const t = await res.text();
+				throw new Error(t || `Export failed (${res.status})`);
+			}
+			const blob = await res.blob();
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			// backend sets name, but for safety:
+			a.download = `dataset_${fileId}_${start}-${end}.csv`;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			URL.revokeObjectURL(url);
+		} catch (error) {
+			throw error;
+		}
+	};
+
 	return {
 		keys,
 		rows,
@@ -120,5 +159,6 @@ export default function useLabel(id: string) {
 		dataset,
 		updateLabel,
 		tokens,
+		exportCSV,
 	};
 }

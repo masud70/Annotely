@@ -1,7 +1,7 @@
 // src/router/files.ts
 import { Router } from "express";
 import {
-    datasetController,
+	datasetController,
 	getConfigure,
 	postConfigure,
 } from "../controller/datasetController.ts";
@@ -21,5 +21,6 @@ datasetRouter.post(
 );
 datasetRouter.get("/config", getConfigure);
 datasetRouter.patch("/config/:id", datasetController.updateDatasetConfig);
+datasetRouter.post("/export/:id", datasetController.exportFile);
 
 export default datasetRouter;
