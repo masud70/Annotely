@@ -42,6 +42,7 @@ model Row {
     fileId   Int
     rowIndex Int
     data     Json
+    code     String?
     label    String?
     file     File    @relation(fields: [fileId], references: [id], onDelete: Cascade)
 

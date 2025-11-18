@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 export const useConfig = (id: string) => {
 	const [dataset, setDataset] = useState<Dataset | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [processing, setProcessing]= useState<boolean>(false);
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 	const [highlightColor, setHighlightColor] = useState<string>();
 	const [selectedFile, setSelectedFile] = useState<number>();
@@ -61,7 +62,7 @@ export const useConfig = (id: string) => {
 	};
 
 	const saveConfig = async () => {
-		setIsLoading(true);
+		setProcessing(true);
 		try {
 			console.log("KW:", keywords);
 			console.log("L:", labels);
@@ -75,7 +76,7 @@ export const useConfig = (id: string) => {
 						highlightColor,
 						keyColumn,
 						configured: true,
-						keywords: keywords.trim().split(","),
+						keywords: keywords.split(","),
 						labels: normLabels(inputLabels),
 					}),
 				}
@@ -91,7 +92,7 @@ export const useConfig = (id: string) => {
 		} catch (error) {
 			console.log(error);
 		} finally {
-			setIsLoading(false);
+			setProcessing(false);
 		}
 	};
 
@@ -125,5 +126,6 @@ export const useConfig = (id: string) => {
 		setLabels,
 		inputLabels,
 		setInputLabels,
+        processing
 	};
 };

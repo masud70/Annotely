@@ -141,32 +141,3 @@ export const commonMiddleware: {
 		});
 	},
 };
-
-// Compose: run multer, then respond
-// const uploadHandler: RequestHandler = (req: Request, res: Response) => {
-// 	// multer puts the file on req.file (single) / req.files (multi)
-// 	if (!req.file) {
-// 		return res.status(400).json({ ok: false, error: "No file uploaded" });
-// 	}
-// 	return res.status(201).json({
-// 		ok: true,
-// 		file: {
-// 			filename: req.file.filename,
-// 			originalname: req.file.originalname,
-// 			mimetype: req.file.mimetype,
-// 			size: req.file.size,
-// 			path: req.file.path,
-// 		},
-// 	});
-// };
-
-// export const upload: RequestHandler = (
-// 	req: Request,
-// 	res: Response,
-// 	next: NextFunction
-// ) => {
-// 	uploader.single("file")(req, res, (err: any) => {
-// 		if (err) return next(err);
-// 		return uploadHandler(req, res, next);
-// 	});
-// };

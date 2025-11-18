@@ -26,4 +26,23 @@ export const labelService = {
 			throw error;
 		}
 	},
+
+	updateCode: async ({
+		rowId,
+		codes,
+	}: {
+		rowId: number;
+		codes: string[];
+	}) => {
+		try {
+			return db.row.update({
+				where: { id: rowId },
+				data: {
+					code: codes.map((v: string) => v.trim()).join(", "),
+				},
+			});
+		} catch (error) {
+			throw error;
+		}
+	},
 };

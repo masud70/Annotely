@@ -1,17 +1,18 @@
 import { Dataset, Label, LabelStat, Row, RSS, Token } from "@/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-export default function useLabel(id: string) {
+export default function useCoding(id: string) {
 	const [keys, setKeys] = useState<string[]>([]);
-	const [rows, setRows] = useState<Record<string, RSS>>({});
+	const [rows, setRows] = useState<Record<string, Row>>({});
 	const [dataset, setDataset] = useState<Dataset | undefined>(undefined);
 	const [currentIndex, setCurrentIndex] = useState<number>(0);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [processing, setProcessing] = useState<boolean>(false);
 	const [tokens, setTokens] = useState<Token[]>([]);
+	const [codes, setCodes] = useState<string[]>([]);
 
 	const parseRows = useCallback((keyCol: string, dSet: Dataset) => {
-		const out: Record<string, RSS> = {};
+		const out: Record<string, Row> = {};
 
 		for (const r of dSet?.rows || []) {
 			const rec = r.data;
@@ -23,7 +24,13 @@ export default function useLabel(id: string) {
 			delete rest[keyCol];
 
 			const k = String(keyVal);
-			out[k] = { ...rest, rowId: String(r.id), _label: r.label };
+			out[k] = {
+				data: rest,
+				id: r.id,
+				label: r.label,
+				code: r.code,
+				fileId: dSet.id,
+			};
 		}
 		setKeys(Object.keys(out));
 		setRows(out);
@@ -64,7 +71,7 @@ export default function useLabel(id: string) {
 		[parseRows]
 	);
 	const getLabelStats = (
-		rows: Record<string, RSS>,
+		rows: Record<string, Row>,
 		labels: Label[],
 		unlabeledName = "Unlabeled",
 		unlabeledColor = "#9CA3AF",
@@ -72,7 +79,7 @@ export default function useLabel(id: string) {
 	): LabelStat[] => {
 		const counts = new Map<string, number>();
 		for (const k of Object.keys(rows)) {
-			const raw = (rows[k]._label ?? "").trim();
+			const raw = (rows[k].label ?? "").trim();
 			const key = raw || unlabeledName;
 			counts.set(key, (counts.get(key) ?? 0) + 1);
 		}
@@ -104,27 +111,27 @@ export default function useLabel(id: string) {
 	}, [id, loadDatasetAndConfig]);
 
 	const stats = useMemo(
-		() => getLabelStats(rows, dataset?.labels ?? []),
+		() => getLabelStats(rows!, dataset?.labels ?? []),
 		[rows, dataset?.labels]
 	);
 
-	const updateLabel = async ({
+	const updateCode = async ({
 		rowId,
-		label,
+		codes,
 	}: {
 		rowId: string;
-		label: string;
+		codes: string[];
 	}) => {
 		setProcessing(true);
 		try {
 			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_BASE_URL}/label/update/`,
+				`${process.env.NEXT_PUBLIC_BASE_URL}/code/update/`,
 				{
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						rowId: Number(rowId),
-						label,
+						codes,
 					}),
 				}
 			);
@@ -143,10 +150,12 @@ export default function useLabel(id: string) {
 			delete rest[keyCol];
 
 			const k = String(keyVal);
-			const newRow: RSS = {
-				...rest,
-				rowId: String(row.id),
-				_label: row.label ?? "",
+			const newRow: Row = {
+				data: rest,
+				id: row.id,
+				label: row.label ?? "",
+                code: row.code,
+                fileId: row.id
 			};
 
 			console.log(newRow);
@@ -171,7 +180,6 @@ export default function useLabel(id: string) {
 		end: number;
 	}) => {
 		try {
-			setProcessing(true);
 			const res = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/dataset/export/${fileId}`,
 				{
@@ -196,8 +204,6 @@ export default function useLabel(id: string) {
 			URL.revokeObjectURL(url);
 		} catch (error) {
 			throw error;
-		} finally {
-			setProcessing(false);
 		}
 	};
 
@@ -209,10 +215,12 @@ export default function useLabel(id: string) {
 		setCurrentIndex,
 		isLoading,
 		dataset,
-		updateLabel,
+		updateCode,
 		tokens,
 		exportCSV,
 		getLabelStats,
-        processing
+		codes,
+		setCodes,
+		processing,
 	};
 }

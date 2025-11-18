@@ -2,7 +2,6 @@
 import MarkdownViewer from "@/components/MarkdownView";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@/components/ui/icons/akar-icons-play";
-import useLabel from "@/hooks/useLabel";
 import { useParams } from "next/navigation";
 import { ExportDataset } from "@/components/ExportDataset";
 import React, { useEffect, useRef, useState } from "react";
@@ -10,7 +9,10 @@ import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExternalLink, LucideHighlighter, SaveIcon } from "lucide-react";
 import { scrollbar } from "@/lib/utils";
+import useCoding from "@/hooks/useCoding";
+import { CodeInput } from "@/components/CodeInput";
 import Loader from "@/components/ui/Loader";
+import { RSS } from "@/types";
 
 const LabelDataset = () => {
 	const { id } = useParams<{ id: string }>();
@@ -20,14 +22,14 @@ const LabelDataset = () => {
 	const {
 		dataset,
 		rows,
-		stats,
+		// stats,
 		currentIndex,
 		setCurrentIndex,
 		keys,
-		updateLabel,
 		tokens,
 		isLoading,
-	} = useLabel(id);
+		updateCode,
+	} = useCoding(id);
 
 	useEffect(() => {
 		selectedItemRef.current?.scrollIntoView({
@@ -36,7 +38,7 @@ const LabelDataset = () => {
 		});
 	}, [currentIndex, keys.length]);
 
-	if (isLoading) return <Loader show global />;
+	if (isLoading) return <Loader global show />;
 
 	return (
 		<>
@@ -68,7 +70,10 @@ const LabelDataset = () => {
 						))}
 					</div>
 				</div>
-				<div className="flex-1 flex flex-col h-full min-h-0 overflow-hidden bg-transparent">
+
+				{/* div1 which must be h-full */}
+				<div className="flex-1 flex flex-col min-h-0 h-full overflow-hidden min-w-0 bg-transparent">
+					{/* div2 */}
 					<div className="w-full bg-transparent h-[40px] items-center flex justify-between px-2 space-x-2 border-y-2 border-gray-400">
 						<div className="min-w-[80px] flex gap-1">
 							Row:{" "}
@@ -76,7 +81,7 @@ const LabelDataset = () => {
 								currentIndex + 1
 							}/${keys.length}`}</p>
 						</div>
-						<div className="flex space-x-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]">
+						{/* <div className="flex space-x-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]">
 							{stats.map((s, id) => (
 								<div
 									key={id}
@@ -90,16 +95,16 @@ const LabelDataset = () => {
 									<div className="mb-0.5">{s.count}</div>
 								</div>
 							))}
-						</div>
+						</div> */}
 						<div className="space-x-2 justify-center flex">
-							<div
-								className="shrink-0 cursor-pointer flex items-center space-x-1 hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400"
+							<button
 								onClick={() => setHighlight((p) => !p)}
+								className="shrink-0 cursor-pointer flex items-center space-x-1 hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400"
 							>
 								<Checkbox checked={highlight} />
 								<p className="hidden md:block">Highlight</p>
 								<LucideHighlighter size={20} />
-							</div>
+							</button>
 							<button
 								onClick={() => setOpen(true)}
 								className="shrink-0 flex gap-1 items-center cursor-pointer hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400 "
@@ -116,62 +121,71 @@ const LabelDataset = () => {
 							</Link>
 						</div>
 					</div>
+
+					{/* div3 */}
 					<div
 						className={
-							"flex-1 min-h-0 w-auto overflow-y-auto px-1" +
+							"w-auto flex-1 min-h-0 overflow-y-auto px-1" +
 							scrollbar
 						}
 					>
-						<div className="grid grid-cols-[auto_1fr] w-full gap-y-0.5">
+						<div
+							className={
+								"grid grid-cols-[auto_1fr] w-full gap-y-0.5"
+							}
+						>
 							{keys.length > 0 && dataset?.selectedColumns
-								? Object.keys(
-										rows[keys[currentIndex]] ?? {}
-								  ).map((k, id) =>
-										[
-											...dataset?.selectedColumns,
+								? (() => {
+										const row = rows[keys[currentIndex]];
+										if (!row) return null;
+
+										const display: RSS = {
+											...row.data,
+											_label: row.label ?? "",
+											code: row.code ?? "",
+										};
+
+										// only render selected columns + extras
+										const allowed = new Set([
+											...dataset.selectedColumns,
 											"_label",
-										].includes(k) ? (
-											<React.Fragment key={id}>
-												<div className="min-w-[60px] text-center shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-300 dark:bg-gray-700 p-1">
-													{k}
-												</div>
-												<MarkdownViewer
-													tokens={tokens}
-													highlight={highlight}
-													markdown={
-														rows[
-															keys[currentIndex]
-														][k] ?? ""
-													}
-												/>
-											</React.Fragment>
-										) : null
-								  )
+											"code",
+										]);
+
+										return Object.keys(display).map((k) =>
+											allowed.has(k) ? (
+												<React.Fragment key={k}>
+													<div className="min-w-[60px] text-center shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-300 dark:bg-gray-700 p-1">
+														{k}
+													</div>
+													<MarkdownViewer
+														tokens={tokens}
+														highlight={highlight}
+														markdown={
+															display[k] ?? ""
+														}
+													/>
+												</React.Fragment>
+											) : null
+										);
+								  })()
 								: null}
 						</div>
 					</div>
-					<div className="h-[100px] p-2 items-center border-t-2 border-gray-400 flex flex-col">
-						<div className="flex-1 items-center justify-center space-x-2 overflow-x-auto">
-							{dataset?.labels.map((l, idx) => (
-								<Button
-									key={idx}
-									className="border-2 py-1 px-4 cursor-pointer"
-									variant={"ghost"}
-									style={{ backgroundColor: l.color }}
-									onClick={() =>
-										updateLabel({
-											rowId: rows[keys[currentIndex]][
-												"rowId"
-											],
-											label: l.name,
-										})
-									}
-								>
-									{l.name}
-								</Button>
-							))}
+
+					{/* div4 */}
+					<div className="p-1 items-center border-t-2 border-gray-400 flex flex-col gap-1">
+						<div className="flex-1 items-center justify-center space-x-2 overflow-x-auto w-full lg:w-[50%]">
+							<CodeInput
+								key={`${rows[keys[currentIndex]]?.id}:${
+									rows[keys[currentIndex]]?.code ?? ""
+								}`}
+								code={rows[keys[currentIndex]]?.code}
+								rowId={String(rows[keys[currentIndex]]?.id)}
+								onSave={updateCode}
+							/>
 						</div>
-						<div className="flex items-center justify-center space-x-2 overflow-x-auto mt-2">
+						<div className="flex items-center justify-center space-x-2 overflow-x-auto">
 							<Button
 								className="border-2 border-gray-400 p-2 space-x-[-10px] cursor-pointer"
 								variant={"ghost"}

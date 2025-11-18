@@ -87,7 +87,7 @@ export const datasetService = {
 				id: f.id,
 				fileName: f.fileName,
 				rowCount: f._count.rows,
-                configured: f.configured,
+				configured: f.configured,
 				uploadedAt: f.uploadedAt.toISOString(),
 				updatedAt: f.updatedAt.toISOString(),
 			}));
@@ -118,10 +118,14 @@ export const datasetService = {
 		body: Record<string, any>;
 	}) => {
 		try {
-			const { labels, ...data } = body;
+			const { labels, keywords, ...data } = body;
 			await db.file.update({
 				where: { id: fileId },
-				data: { ...data, configured: true },
+				data: {
+					...data,
+					keywords: keywords.map((k: string) => k.trim()),
+					configured: true,
+				},
 			});
 
 			if (labels) {

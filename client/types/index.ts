@@ -28,6 +28,7 @@ export type Row = {
 	fileId: number;
 	id: number;
 	label: string;
+    code: string;
 };
 
 export type Dataset = {

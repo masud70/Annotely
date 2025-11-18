@@ -12,6 +12,7 @@ import labelRouter from "./router/labelRouter.ts";
 import indexRouter from "./router/index.ts";
 import { commonMiddleware } from "./middleware/index.ts";
 import filesRouter from "./router/datasetRouter.ts";
+import codeRouter from "./router/codeRouter.ts";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 
 app.use("/", indexRouter);
 app.use("/label", labelRouter);
+app.use("/code", codeRouter);
 app.use("/dataset", filesRouter);
 
 app.use(commonMiddleware.errorMiddleware);
