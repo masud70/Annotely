@@ -209,6 +209,17 @@ export const datasetService = {
 			throw error;
 		}
 	},
+
+	deleteDataset: async (fileId: number) => {
+		try {
+			const result = await db.file.delete({
+				where: { id: fileId },
+			});
+			return result;
+		} catch (error) {
+			throw error;
+		}
+	},
 };
 
 function detectFileType(filename: string): FileType {

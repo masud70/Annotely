@@ -22,5 +22,6 @@ datasetRouter.post(
 datasetRouter.get("/config", getConfigure);
 datasetRouter.patch("/config/:id", datasetController.updateDatasetConfig);
 datasetRouter.post("/export/:id", datasetController.exportFile);
+datasetRouter.delete("/delete/:id", datasetController.deleteDataset);
 
 export default datasetRouter;

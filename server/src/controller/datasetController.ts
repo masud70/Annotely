@@ -114,6 +114,19 @@ export const datasetController = {
 			next(error);
 		}
 	},
+
+	deleteDataset: async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const id = Number(req.params.id);
+			if (!Number.isFinite(id)) next("Invalid file id");
+
+			const result = await datasetService.deleteDataset(id);
+
+			res.json({ ok: true, data: result });
+		} catch (e) {
+			next(e);
+		}
+	},
 };
 
 export async function getAllUploads(

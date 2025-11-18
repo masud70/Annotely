@@ -90,5 +90,6 @@ export default function useUpload() {
 		gettingFiles,
 		uploaded,
 		handleDrop,
+        getAllDatasets
 	};
 }

@@ -11,8 +11,8 @@ const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:3000";
 import labelRouter from "./router/labelRouter.ts";
 import indexRouter from "./router/index.ts";
 import { commonMiddleware } from "./middleware/index.ts";
-import filesRouter from "./router/datasetRouter.ts";
 import codeRouter from "./router/codeRouter.ts";
+import datasetRouter from "./router/datasetRouter.ts";
 
 const app = express();
 
@@ -23,7 +23,7 @@ app.use(express.json());
 app.use("/", indexRouter);
 app.use("/label", labelRouter);
 app.use("/code", codeRouter);
-app.use("/dataset", filesRouter);
+app.use("/dataset", datasetRouter);
 
 app.use(commonMiddleware.errorMiddleware);
 

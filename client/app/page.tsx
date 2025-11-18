@@ -9,8 +9,14 @@ import {
 } from "@/components/ui/shadcn-io/dropzone";
 
 export default function Home() {
-	const { uploading, files, uploaded, gettingFiles, handleDrop } =
-		useUpload();
+	const {
+		uploading,
+		files,
+		uploaded,
+		gettingFiles,
+		handleDrop,
+		getAllDatasets,
+	} = useUpload();
 
 	return (
 		<div className=" text-black dark:text-white flex items-center flex-col space-y-4 py-2">
@@ -32,9 +38,18 @@ export default function Home() {
 				<DropzoneContent />
 			</Dropzone>
 			<div className="w-[90%] mx-auto space-y-4">
-				<UploadsTable data={uploaded} loading={gettingFiles} />
+				<UploadsTable
+					data={uploaded}
+					loading={gettingFiles}
+					loadDataset={getAllDatasets}
+				/>
 			</div>
-			<Loader show={uploading} text="Uploading file..." />
+			<Loader
+				show={uploading}
+				global
+				transparency={100}
+				text="Uploading file..."
+			/>
 		</div>
 	);
 }
