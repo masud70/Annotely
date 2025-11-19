@@ -27,8 +27,9 @@ export type Row = {
 	data: RSS;
 	fileId: number;
 	id: number;
-	label: string;
-    code: string;
+	label?: string;
+    code?: string;
+	theme?: string;
 };
 
 export type Dataset = {

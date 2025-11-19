@@ -4,6 +4,7 @@ import { labelController } from "../controller/labelController.ts";
 
 const codeRouter = Router();
 
-codeRouter.post("/update", labelController.updateCode);
+codeRouter.post("/updateCode", labelController.updateCode);
+codeRouter.post("/updateTheme", labelController.updateTheme);
 
 export default codeRouter;

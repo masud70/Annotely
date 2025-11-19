@@ -45,4 +45,16 @@ export const labelController = {
 			next(error);
 		}
 	},
+
+	updateTheme: async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const result = await labelService.updateTheme(req.body);
+			res.json({
+				ok: true,
+				data: result,
+			});
+		} catch (error) {
+			next(error);
+		}
+	}
 };
