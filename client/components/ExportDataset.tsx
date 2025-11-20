@@ -93,8 +93,7 @@ export function ExportDataset({
 					<DialogTitle>Export file</DialogTitle>
 					<DialogDescription>
 						Choose which columns to include and the row range to
-						export. The export will produce a CSV (a trailing{" "}
-						<code>_label</code> column is included) for rows from
+						export. The export will produce a CSV for rows from
 						Start to End (inclusive). Large ranges may take longer
 						to prepare.
 					</DialogDescription>
@@ -103,7 +102,13 @@ export function ExportDataset({
 					<div>
 						<div className="font-medium mb-2">Select columns :</div>
 						<div className="flex flex-wrap gap-2 justify-between">
-							{allColumns.map((c) => (
+							{[
+								...allColumns,
+								"_label",
+								"_code",
+								"_theme",
+								"_note",
+							].map((c) => (
 								<button
 									key={c}
 									type="button"

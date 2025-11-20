@@ -7,21 +7,13 @@ import { parse as csvParse } from "csv-parse";
 import * as parquet from "parquetjs-lite";
 import { FileSummary, FileType, RSS } from "../types/index.ts";
 import { db } from "../lib/db.ts";
+import { chunk, esc } from "../lib/utils.ts";
 
 const UPLOAD_DIR = path.join(
 	process.cwd(),
 	process.env.UPLOAD_PATH || "uploads"
 );
 const CONFIG_DIR = path.join(UPLOAD_DIR, process.env.CONFIG_PATH || "config");
-function chunk<T>(arr: T[], size = 1000): T[][] {
-	const out: T[][] = [];
-	for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-	return out;
-}
-const esc = (v: unknown) => {
-	const s = v == null ? "" : String(v);
-	return /[,"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-};
 
 export const datasetService = {
 	saveDataset: async ({
@@ -185,18 +177,25 @@ export const datasetService = {
 			const rows = await db.row.findMany({
 				where: { fileId, rowIndex: { gte: start, lt: end } },
 				orderBy: { rowIndex: "asc" },
-				select: { data: true, rowIndex: true, label: true },
+				select: {
+					data: true,
+					rowIndex: true,
+					label: true,
+					code: true,
+					theme: true,
+					note: true,
+				},
 			});
 
-			const cols = [...columns, "_label"];
-
-			const header = cols.map(esc).join(",") + "\r\n";
+			const header = columns.map(esc).join(",") + "\r\n";
 			const body = rows
 				.map((r) => {
 					const rec = r.data as Record<string, unknown>;
+					rec._label = r.label ?? "";
+					rec._code = r.code ?? "";
+					rec._theme = r.theme ?? "";
+					rec._note = r.note ?? "";
 					const line = columns.map((c) => esc(rec?.[c]));
-					// push label column
-					line.push(esc(r.label ?? ""));
 					return line.join(",");
 				})
 				.join("\r\n");

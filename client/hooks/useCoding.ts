@@ -100,6 +100,7 @@ export default function useCoding(id: string) {
 		},
 		[parseRows]
 	);
+    
 	const getLabelStats = (
 		rows: Record<string, Row>,
 		labels: Label[],
