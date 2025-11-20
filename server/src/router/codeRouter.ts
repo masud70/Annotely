@@ -6,5 +6,6 @@ const codeRouter = Router();
 
 codeRouter.post("/updateCode", labelController.updateCode);
 codeRouter.post("/updateTheme", labelController.updateTheme);
+codeRouter.post("/updateNote", labelController.updateNote);
 
 export default codeRouter;

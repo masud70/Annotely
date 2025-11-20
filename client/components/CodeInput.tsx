@@ -104,12 +104,11 @@ export const CodeInput = ({
 
 	return (
 		<div className="relative">
-			{open && [input, ...filtered].length > 0 && (
+			{open && (input?.trim() || filtered.length > 0) && (
 				<ul
 					ref={listRef}
 					role="listbox"
 					className={
-						// was: "absolute left-0 right-[100px] mt-1 ..."
 						"absolute left-0 right-[100px] bottom-full mb-1 " +
 						"max-h-56 overflow-auto rounded-md border border-gray-300 dark:border-gray-700 " +
 						"bg-white dark:bg-gray-900 shadow-md z-50 " +
@@ -118,7 +117,7 @@ export const CodeInput = ({
 				>
 					{[input, ...filtered].map(
 						(s, i) =>
-							s && (
+							s?.trim() && (
 								<li
 									key={s}
 									role="option"
@@ -129,7 +128,7 @@ export const CodeInput = ({
 											? "bg-gray-200 dark:bg-gray-700"
 											: "hover:bg-gray-100 dark:hover:bg-gray-800"
 									}`}
-									onMouseEnter={() => setActive(i)}
+									onMouseUp={() => setActive(i)}
 									onMouseDown={(e) => {
 										e.preventDefault();
 										addValue(s ?? "");

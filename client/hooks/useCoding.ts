@@ -12,6 +12,7 @@ export default function useCoding(id: string) {
 	const [codes, setCodes] = useState<string[]>([]);
 	const [themes, setThemes] = useState<string[]>([]);
 	const [stayOnPage, setStayOnPage] = useState<boolean>(false);
+	const [notes, setNotes] = useState<string>("");
 
 	useEffect(() => {
 		const c: string[] = Array.from(
@@ -59,6 +60,7 @@ export default function useCoding(id: string) {
 				label: r.label,
 				code: r.code,
 				theme: r.theme,
+                note: r.note,
 				fileId: dSet.id,
 			};
 		}
@@ -100,7 +102,7 @@ export default function useCoding(id: string) {
 		},
 		[parseRows]
 	);
-    
+
 	const getLabelStats = (
 		rows: Record<string, Row>,
 		labels: Label[],
@@ -187,6 +189,7 @@ export default function useCoding(id: string) {
 				label: row.label ?? "",
 				code: row.code,
 				theme: row.theme,
+				note: row.note,
 				fileId: row.id,
 			};
 
@@ -242,6 +245,63 @@ export default function useCoding(id: string) {
 				label: row.label ?? "",
 				code: row.code,
 				theme: row.theme,
+				note: row.note,
+				fileId: row.id,
+			};
+			console.log(newRow);
+			setRows((prev) => ({ ...prev, [k]: newRow }));
+			if (!stayOnPage)
+				setCurrentIndex((p) => Math.min(p + 1, keys.length - 1));
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setProcessing(false);
+		}
+	};
+
+	const updateNotes = async ({
+		rowId,
+		note,
+	}: {
+		rowId: string;
+		note: string;
+	}) => {
+		if (!note.trim() || processing) return;
+		setProcessing(true);
+		try {
+			const res = await fetch(
+				`${process.env.NEXT_PUBLIC_BASE_URL}/code/updateNote/`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						rowId: Number(rowId),
+						note: note,
+					}),
+				}
+			);
+			const json = (await res.json()) as { ok: boolean; data: Row };
+			if (!json.ok) throw new Error("Failed updating notes");
+
+			const row = json.data;
+			const rec = row.data;
+			const keyCol = dataset?.keyColumn;
+			if (!keyCol) throw new Error("No keyColumn on dataset");
+
+			const keyVal = rec[keyCol];
+			if (!keyVal) throw new Error(`Key "${keyCol}" missing in row data`);
+
+			const rest: RSS = { ...rec };
+			delete rest[keyCol];
+
+			const k = String(keyVal);
+			const newRow: Row = {
+				data: rest,
+				id: row.id,
+				label: row.label ?? "",
+				code: row.code,
+				theme: row.theme,
+				note: row.note,
 				fileId: row.id,
 			};
 			console.log(newRow);
@@ -314,5 +374,8 @@ export default function useCoding(id: string) {
 		processing,
 		stayOnPage,
 		setStayOnPage,
+		notes,
+		setNotes,
+		updateNotes,
 	};
 }

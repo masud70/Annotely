@@ -30,6 +30,7 @@ export type Row = {
 	label?: string;
 	code?: string;
 	theme?: string;
+    note?: string;
 };
 
 export type Dataset = {

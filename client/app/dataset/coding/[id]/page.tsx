@@ -7,18 +7,35 @@ import { ExportDataset } from "@/components/ExportDataset";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ExternalLink, LucideHighlighter, SaveIcon } from "lucide-react";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+	ExternalLink,
+	LucideHighlighter,
+	PlusCircleIcon,
+	SaveIcon,
+} from "lucide-react";
 import { scrollbar } from "@/lib/utils";
 import useCoding from "@/hooks/useCoding";
 import { CodeInput } from "@/components/CodeInput";
 import Loader from "@/components/ui/Loader";
 import { RSS } from "@/types";
+import { Textarea } from "@/components/ui/textarea";
 
 const CodeDataset = () => {
 	const { id } = useParams<{ id: string }>();
 	const [open, setOpen] = useState(false);
 	const [highlight, setHighlight] = useState<boolean>(true);
 	const selectedItemRef = useRef<HTMLDivElement | null>(null);
+	const [noteOpen, setNoteOpen] = useState(false);
 	const {
 		dataset,
 		rows,
@@ -34,6 +51,9 @@ const CodeDataset = () => {
 		codes,
 		stayOnPage,
 		setStayOnPage,
+		notes,
+		setNotes,
+		updateNotes,
 	} = useCoding(id);
 
 	useEffect(() => {
@@ -149,6 +169,7 @@ const CodeDataset = () => {
 											_label: row.label ?? "",
 											_code: row.code ?? "",
 											_theme: row.theme ?? "",
+											_note: row.note ?? "",
 										};
 
 										// only render selected columns + extras
@@ -157,6 +178,7 @@ const CodeDataset = () => {
 											"_label",
 											"_code",
 											"_theme",
+											"_note",
 										]);
 
 										return Object.keys(display).map((k) =>
@@ -181,7 +203,89 @@ const CodeDataset = () => {
 					</div>
 
 					{/* div4 */}
-					<div className="p-1 items-center border-t-2 border-gray-400 flex flex-col gap-1">
+					<div className="p-1 items-center border-t-2 border-gray-400 flex flex-col gap-1 relative">
+						<Dialog open={noteOpen} onOpenChange={setNoteOpen}>
+							<DialogTrigger asChild>
+								<button className="absolute bg-gray-900/90 rounded-full cursor-pointer p-1 right-[10px] top-[-65px]">
+									<PlusCircleIcon size={45} />
+								</button>
+							</DialogTrigger>
+							<DialogContent className="w-[100%] lg:w-[60%]">
+								<DialogHeader>
+									<DialogTitle className="text-center">
+										Add Note
+									</DialogTitle>
+									<DialogDescription className="text-center">
+										Key column value:{" "}
+										<span className="font-bold">
+											{keys[currentIndex]}
+										</span>
+									</DialogDescription>
+								</DialogHeader>
+								<div className="flex items-center gap-2">
+									<div className="grid flex-1 gap-2">
+										<Textarea
+											value={notes}
+											onChange={(e) =>
+												setNotes(e.target.value)
+											}
+											placeholder="Write your note here..."
+											className={
+												"max-h-[200px]" + scrollbar
+											}
+											onKeyUp={(e) => {
+												if (e.key === "Escape") {
+													setNoteOpen(false);
+												} else if (
+													e.key === "Enter" &&
+													(e.ctrlKey || e.metaKey)
+												) {
+													updateNotes({
+														rowId: String(
+															rows[
+																keys[
+																	currentIndex
+																]
+															]?.id
+														),
+														note: notes,
+													});
+													setNotes("");
+													setNoteOpen(false);
+												}
+											}}
+										/>
+									</div>
+								</div>
+								<DialogFooter className="sm:justify-end">
+									<DialogClose asChild>
+										<Button
+											type="button"
+											variant="secondary"
+										>
+											Close
+										</Button>
+									</DialogClose>
+									<Button
+										onClick={async () => {
+											await updateNotes({
+												rowId: String(
+													rows[keys[currentIndex]]?.id
+												),
+												note: notes,
+											});
+											setNotes("");
+											setNoteOpen(false);
+										}}
+										type="submit"
+										title="Ctrl+Enter"
+									>
+										Save Note
+									</Button>
+								</DialogFooter>
+							</DialogContent>
+						</Dialog>
+
 						<div className="flex-1 grid grid-cols-1 lg:grid-cols-2 lg:flex-row items-center justify-center gap-x-2 w-full lg:w-[70%]">
 							<CodeInput
 								placeholder="Add new code..."

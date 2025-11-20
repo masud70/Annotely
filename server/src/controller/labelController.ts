@@ -56,5 +56,17 @@ export const labelController = {
 		} catch (error) {
 			next(error);
 		}
-	}
+	},
+	updateNote: async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const result = await labelService.updateNote(req.body);
+            console.log(result);
+			res.json({
+				ok: true,
+				data: result,
+			});
+		} catch (error) {
+			next(error);
+		}
+	},
 };

@@ -21,7 +21,10 @@ export const labelService = {
 
 	updateLabel: async ({ rowId, label }: { rowId: number; label: string }) => {
 		try {
-			return await db.row.update({ where: { id: rowId }, data: { label } });
+			return await db.row.update({
+				where: { id: rowId },
+				data: { label },
+			});
 		} catch (error) {
 			throw error;
 		}
@@ -58,6 +61,18 @@ export const labelService = {
 				where: { id: rowId },
 				data: {
 					theme: themes.map((v: string) => v.trim()).join(", "),
+				},
+			});
+		} catch (error) {
+			throw error;
+		}
+	},
+	updateNote: async ({ rowId, note }: { rowId: number; note: string }) => {
+		try {
+			return db.row.update({
+				where: { id: rowId },
+				data: {
+					note: note.trim(),
 				},
 			});
 		} catch (error) {
