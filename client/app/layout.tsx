@@ -38,7 +38,7 @@ export default function RootLayout({
 						<div className="pb-[50px]">
 							<Navbar />
 						</div>
-						<div className="h-[calc(100vh-50px)] lg:px-4 overflow-auto">
+						<div className="h-[calc(100vh-50px)] overflow-auto">
 							{children}
 						</div>
 					</div>

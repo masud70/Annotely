@@ -28,7 +28,7 @@ export type Row = {
 	fileId: number;
 	id: number;
 	label?: string;
-    code?: string;
+	code?: string;
 	theme?: string;
 };
 
@@ -59,3 +59,5 @@ export type Token =
 			flags?: string;
 	  }
 	| { pattern: RegExp; color: string; flags?: string };
+
+export type SaveFnType = (p: { rowId: string; values: string[] }) => Promise<void>;
