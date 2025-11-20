@@ -102,14 +102,14 @@ const CodeDataset = () => {
 							))}
 						</div> */}
 						<div className="space-x-2 justify-center flex">
-							<button
+							<div
 								onClick={() => setHighlight((p) => !p)}
 								className="shrink-0 cursor-pointer flex items-center space-x-1 hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400"
 							>
 								<Checkbox checked={highlight} />
 								<p className="hidden md:block">Highlight</p>
 								<LucideHighlighter size={20} />
-							</button>
+							</div>
 							<button
 								onClick={() => setOpen(true)}
 								className="shrink-0 flex gap-1 items-center cursor-pointer hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400 "

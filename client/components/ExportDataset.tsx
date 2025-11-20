@@ -102,13 +102,15 @@ export function ExportDataset({
 					<div>
 						<div className="font-medium mb-2">Select columns :</div>
 						<div className="flex flex-wrap gap-2 justify-between">
-							{[
-								...allColumns,
-								"_label",
-								"_code",
-								"_theme",
-								"_note",
-							].map((c) => (
+							{Array.from(
+								new Set([
+									...allColumns,
+									"_label",
+									"_code",
+									"_theme",
+									"_note",
+								])
+							).map((c) => (
 								<button
 									key={c}
 									type="button"

@@ -117,7 +117,7 @@ export default function ConfigurePage() {
 
 							<select
 								className="w-full rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
-								value={keyColumn}
+								value={keyColumn??""}
 								onChange={(e) => setKeyColumn(e.target.value)}
 								disabled={isLoading}
 								// defaultValue={keyColumn}

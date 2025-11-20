@@ -26,7 +26,7 @@ export const CodeInput = ({
 	onSave: SaveFnType;
 	suggestions?: string[];
 }) => {
-	const [input, setInput] = useState("");
+	const [input, setInput] = useState<string | null>(null);
 	const [open, setOpen] = useState(false);
 	const [active, setActive] = useState(0);
 	const listRef = useRef<HTMLUListElement | null>(null);
@@ -52,11 +52,9 @@ export const CodeInput = ({
 			(s) => !selected.has(s.toLowerCase())
 		);
 
-		const q = input.trim().toLowerCase();
-		if (!q) return base.slice(0, 12); // 👈 show ALL when empty
-		return base
-			.filter((s) => s.toLowerCase().startsWith(q)) // or .includes(q)
-			.slice(0, 12);
+		const q = (input ?? "").trim().toLowerCase();
+		if (!q) return base.slice(0, 12);
+		return base.filter((s) => s.toLowerCase().includes(q)).slice(0, 12);
 	}, [input, normSuggestions, values]);
 
 	useEffect(() => {
@@ -72,19 +70,20 @@ export const CodeInput = ({
 	};
 
 	const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+		const data = [input, ...filtered];
 		if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
-			if (filtered.length) setOpen(true);
+			if (data.length) setOpen(true);
 			return;
 		}
-		if (!open || filtered.length === 0) return;
+		if (!open || data.length === 0) return;
 
 		if (e.key === "ArrowDown") {
 			e.preventDefault();
-			setActive((i) => Math.min(i + 1, filtered.length - 1));
+			setActive((i) => Math.min(i + 1, data.length - 1));
 			// ensure visibility
 			listRef.current
 				?.querySelectorAll<HTMLLIElement>("[role='option']")
-				[Math.min(active + 1, filtered.length - 1)]?.scrollIntoView({
+				[Math.min(active + 1, data.length - 1)]?.scrollIntoView({
 					block: "nearest",
 				});
 		} else if (e.key === "ArrowUp") {
@@ -94,9 +93,9 @@ export const CodeInput = ({
 				?.querySelectorAll<HTMLLIElement>("[role='option']")
 				[Math.max(active - 1, 0)]?.scrollIntoView({ block: "nearest" });
 		} else if (e.key === "Enter") {
-			if (filtered[active]) {
+			if (active >= 0 && data[active]) {
 				e.preventDefault();
-				addValue(filtered[active]);
+				addValue(data[active]);
 			}
 		} else if (e.key === "Escape") {
 			setOpen(false);
@@ -105,7 +104,7 @@ export const CodeInput = ({
 
 	return (
 		<div className="relative">
-			{open && filtered.length > 0 && (
+			{open && [input, ...filtered].length > 0 && (
 				<ul
 					ref={listRef}
 					role="listbox"
@@ -117,26 +116,29 @@ export const CodeInput = ({
 						scrollbar
 					}
 				>
-					{filtered.map((s, i) => (
-						<li
-							key={s}
-							role="option"
-							aria-selected={i === active}
-							tabIndex={-1}
-							className={`px-3 py-2 cursor-pointer select-none ${
-								i === active
-									? "bg-gray-200 dark:bg-gray-700"
-									: "hover:bg-gray-100 dark:hover:bg-gray-800"
-							}`}
-							onMouseEnter={() => setActive(i)}
-							onMouseDown={(e) => {
-								e.preventDefault(); // don’t blur input
-								addValue(s);
-							}}
-						>
-							{s}
-						</li>
-					))}
+					{[input, ...filtered].map(
+						(s, i) =>
+							s && (
+								<li
+									key={s}
+									role="option"
+									aria-selected={i === active}
+									tabIndex={-1}
+									className={`px-3 py-2 cursor-pointer select-none ${
+										i === active
+											? "bg-gray-200 dark:bg-gray-700"
+											: "hover:bg-gray-100 dark:hover:bg-gray-800"
+									}`}
+									onMouseEnter={() => setActive(i)}
+									onMouseDown={(e) => {
+										e.preventDefault();
+										addValue(s ?? "");
+									}}
+								>
+									{s}
+								</li>
+							)
+					)}
 				</ul>
 			)}
 			<TagsInput
@@ -172,7 +174,7 @@ export const CodeInput = ({
 					))}
 					<TagsInputInput
 						placeholder={placeholder ?? "Add new input..."}
-						value={input}
+						value={input ?? ""}
 						onChange={(e) => {
 							setInput(e.target.value);
 							setOpen(true);
@@ -196,6 +198,7 @@ export const CodeInput = ({
 						</Button>
 					</TagsInputClear>
 					<Button
+						className="min-w-[85px]"
 						onClick={async () =>
 							await onSave({ rowId: rowId, values: values })
 						}

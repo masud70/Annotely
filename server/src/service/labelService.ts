@@ -5,7 +5,7 @@ import { db } from "../lib/db.ts";
 export const labelService = {
 	getDatasetAndConfigById: async (id: number) => {
 		try {
-			const result = db.file.findUniqueOrThrow({
+			const result = await db.file.findUniqueOrThrow({
 				include: {
 					labels: true,
 					rows: true,
@@ -21,7 +21,7 @@ export const labelService = {
 
 	updateLabel: async ({ rowId, label }: { rowId: number; label: string }) => {
 		try {
-			return db.row.update({ where: { id: rowId }, data: { label } });
+			return await db.row.update({ where: { id: rowId }, data: { label } });
 		} catch (error) {
 			throw error;
 		}

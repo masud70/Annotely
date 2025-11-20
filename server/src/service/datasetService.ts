@@ -38,11 +38,52 @@ export const datasetService = {
 				},
 			});
 
-			const rowPayload = rows.map((r, idx) => ({
-				fileId: createdFile.id,
-				rowIndex: idx,
-				data: r,
-			}));
+			const rowPayload = rows.map((r, idx) => {
+				const { _code, _label, _theme, _note, ...data } = r;
+				return {
+					fileId: createdFile.id,
+					rowIndex: idx,
+					data: data,
+					label: _label ?? null,
+					code: _code ?? null,
+					theme: _theme ?? null,
+					note: _note ?? null,
+				};
+			});
+
+			const labels: string[] = Array.from(
+				new Set(
+					rowPayload.map((r) => r.label).filter((l) => l) as string[]
+				)
+			);
+			if (labels) {
+				const incoming = labels.map((l) => ({ name: l, color: null }));
+
+				for (const lab of incoming) {
+					await db.label.upsert({
+						where: {
+							fileId_name: {
+								fileId: createdFile.id,
+								name: lab.name,
+							},
+						},
+						update: { color: lab.color },
+						create: {
+							fileId: createdFile.id,
+							name: lab.name,
+							color: lab.color,
+						},
+					});
+				}
+
+				const keep = incoming.map((l) => l.name);
+				await db.label.deleteMany({
+					where: {
+						fileId: createdFile.id,
+						...(keep.length ? { name: { notIn: keep } } : {}),
+					},
+				});
+			}
 
 			for (const batch of chunk(rowPayload, 1000)) {
 				await db.row.createMany({ data: batch });
@@ -110,12 +151,26 @@ export const datasetService = {
 		body: Record<string, any>;
 	}) => {
 		try {
-			const { labels, keywords, ...data } = body;
+			const { labels, keywords, selectedColumns, keyColumn, ...data } =
+				body;
+
+			if (selectedColumns.length < 2) {
+				throw new Error("At least two columns must be selected.");
+			} else if (keyColumn.trim() === "") {
+				throw new Error("Key column cannot be empty.");
+			} else if (!selectedColumns.includes(keyColumn)) {
+				throw new Error(
+					"Key column must be one of the selected columns."
+				);
+			}
+
 			await db.file.update({
 				where: { id: fileId },
 				data: {
 					...data,
 					keywords: keywords.map((k: string) => k.trim()),
+                    selectedColumns,
+                    keyColumn,
 					configured: true,
 				},
 			});
