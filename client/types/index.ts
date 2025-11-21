@@ -30,7 +30,7 @@ export type Row = {
 	label?: string;
 	code?: string;
 	theme?: string;
-    note?: string;
+	note?: string;
 };
 
 export type Dataset = {
@@ -52,13 +52,16 @@ export type Dataset = {
 	rows: Row[];
 };
 
-export type Token =
-	| {
-			pattern: string;
-			color: string;
-			mode?: "literal" | "word";
-			flags?: string;
-	  }
-	| { pattern: RegExp; color: string; flags?: string };
+export type RegexToken = { pattern: RegExp; color: string; flags?: string };
+export type StringToken = {
+	pattern: string;
+	color: string;
+	mode?: "literal" | "word";
+	flags?: string;
+};
+export type Token = StringToken | RegexToken;
 
-export type SaveFnType = (p: { rowId: string; values: string[] }) => Promise<void>;
+export type SaveFnType = (p: {
+	rowId: string;
+	values: string[];
+}) => Promise<void>;

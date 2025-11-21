@@ -62,6 +62,7 @@ export default function useLabel(id: string) {
 					data.data.keywords.map((t) => ({
 						pattern: t,
 						color: data.data.highlightColor,
+                        mode: "literal"
 					}))
 				);
 			} catch (error) {

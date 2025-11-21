@@ -1,11 +1,17 @@
 // client/components/rehypeKeywordHighlight.ts
-import { Token } from "@/types";
+import { StringToken, Token } from "@/types";
 import type { Root, Element, Text, Node } from "hast";
 
+const SKIP_TAGS = new Set(["kbd", "samp"]);
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const LETTER = "[A-Za-z0-9]";
+
+function isStringToken(t: Token): t is StringToken {
+	return typeof (t as any).pattern === "string";
+}
 
 function compile(token: Token): { rx: RegExp; color: string } {
-	if (token.pattern instanceof RegExp) {
+	if (!isStringToken(token)) {
 		const baseFlags = token.pattern.flags.replace(/g/g, "");
 		const flags =
 			(token.flags ?? baseFlags) + (baseFlags.includes("g") ? "" : "g");
@@ -15,7 +21,11 @@ function compile(token: Token): { rx: RegExp; color: string } {
 		};
 	} else {
 		const { pattern, mode = "literal" } = token;
-		const body = mode === "word" ? `\\b${esc(pattern)}\\b` : esc(pattern);
+		const escaped = esc(pattern);
+		const body =
+			mode === "word"
+				? `(?:^|[^${LETTER.slice(1, -1)}])(${escaped})(?!${LETTER})`
+				: escaped;
 		const base = token.flags ?? "gi";
 		const flags = base.includes("g") ? base : base + "g";
 		return { rx: new RegExp(body, flags), color: token.color };
@@ -29,20 +39,26 @@ function splitWithMarks(
 	if (!text || rules.length === 0)
 		return [{ type: "text", value: text } as Text];
 
-	// Collect all matches
 	type Seg = { start: number; end: number; color: string };
 	const segs: Seg[] = [];
+
 	for (const { rx, color } of rules) {
-		for (const m of text.matchAll(rx)) {
-			const i = m.index ?? 0;
-			const s = m[0] ?? "";
-			if (!s) continue;
-			segs.push({ start: i, end: i + s.length, color });
+		for (const m of text.matchAll(rx) as any) {
+			const fullIndex = m.index ?? 0;
+			const inner = m[1] ?? m[0]; // if we used word-boundary wrapper, inner is in m[1]
+			if (!inner) continue;
+
+			// Find where the inner token starts within the whole match
+			const innerOffset =
+				m[1] != null ? (m[0] as string).indexOf(m[1] as string) : 0;
+
+			const start = fullIndex + innerOffset;
+			const end = start + (inner as string).length;
+			segs.push({ start, end, color });
 		}
 	}
-	if (segs.length === 0) return [{ type: "text", value: text }];
+	if (segs.length === 0) return [{ type: "text", value: text } as Text];
 
-	// Resolve overlaps: prefer longer, then earlier start
 	segs.sort(
 		(a, b) => b.end - b.start - (a.end - a.start) || a.start - b.start
 	);
@@ -53,7 +69,6 @@ function splitWithMarks(
 	}
 	chosen.sort((a, b) => a.start - b.start);
 
-	// Rebuild nodes
 	const out: Node[] = [];
 	let cur = 0;
 	for (const s of chosen) {
@@ -63,7 +78,7 @@ function splitWithMarks(
 			type: "element",
 			tagName: "mark",
 			properties: {
-				style: `background:${s.color};border-radius:3px;padding:0 2px`,
+				style: `background:${s.color};border-radius:3px;padding:0 1px`,
 			},
 			children: [{ type: "text", value: text.slice(s.start, s.end) }],
 		} as Element);
@@ -77,8 +92,6 @@ function splitWithMarks(
 function isText(n: Node): n is Text {
 	return n.type === "text";
 }
-
-const SKIP_TAGS = new Set(["code", "pre", "kbd", "samp"]);
 
 function walk(
 	node: Node,
@@ -113,6 +126,7 @@ export function rehypeKeywordHighlight(tokens: Token[]) {
 	return function attacher() {
 		return function transformer(tree: Root) {
 			if (!rules.length) return;
+			// console.log("Rehype keyword highlight rules:", rules);
 			walk(tree as unknown as Node, rules, false);
 		};
 	};

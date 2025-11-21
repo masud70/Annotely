@@ -1,5 +1,5 @@
 "use client";
-import "highlight.js/styles/github-dark.css";
+// import "highlight.js/styles/github-dark.css";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -11,7 +11,7 @@ import { Token } from "@/types";
 
 export default function MarkdownViewer({
 	markdown,
-	tokens = [{ pattern: "", color: "" }],
+	tokens = [],
 	highlight = true,
 }: {
 	markdown: string;

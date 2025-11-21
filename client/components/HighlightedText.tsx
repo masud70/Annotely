@@ -1,30 +1,44 @@
 // components/HighlightedText.tsx
 "use client";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 
-export type Token =
-	| {
-			pattern: string;
-			color: string;
-			mode?: "literal" | "word";
-			flags?: string;
-	  }
-	| { pattern: RegExp; color: string; flags?: string }; // mode ignored for RegExp
+type RegexToken = { pattern: RegExp; color: string; flags?: string };
+type StringToken = {
+	pattern: string;
+	color: string;
+	mode?: "literal" | "word";
+	flags?: string;
+};
+export type Token = StringToken | RegexToken;
+
+function isStringToken(t: Token): t is StringToken {
+	return typeof (t as any).pattern === "string";
+}
 
 type Segment = { start: number; end: number; color: string };
 
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// “word char” = only letters/digits (underscore is a separator)
+const LETTER = "[A-Za-z0-9]";
 
 function compile(token: Token): RegExp {
-	// Build pattern + flags, always add 'g' for scanning
-	if (token.pattern instanceof RegExp) {
+	if (!isStringToken(token)) {
+		// ensure global flag
 		const baseFlags = token.pattern.flags.replace(/g/g, "");
 		const flags =
 			(token.flags ?? baseFlags) + (baseFlags.includes("g") ? "" : "g");
 		return new RegExp(token.pattern.source, flags);
 	} else {
 		const { pattern, mode = "literal" } = token;
-		const body = mode === "word" ? `\\b${esc(pattern)}\\b` : esc(pattern); // literal/word
+		const escaped = esc(pattern);
+
+		// Fallback-friendly “word” boundary using a capturing group
+		// (?:^|[^A-Za-z0-9]) ( <token> ) (?![A-Za-z0-9])
+		const body =
+			mode === "word"
+				? `(?:^|[^${LETTER.slice(1, -1)}])(${escaped})(?!${LETTER})`
+				: escaped;
+
 		const base = token.flags ?? "gi";
 		const flags = base.includes("g") ? base : base + "g";
 		return new RegExp(body, flags);
@@ -33,15 +47,26 @@ function compile(token: Token): RegExp {
 
 function collectSegments(text: string, tokens: Token[]): Segment[] {
 	const segs: Segment[] = [];
-	tokens.forEach((t, idx) => {
+	tokens.forEach((t) => {
 		const rx = compile(t);
-		for (const m of text.matchAll(rx)) {
-			const i = m.index ?? 0;
-			const seg = m[0] ?? "";
-			if (!seg) continue;
-			segs.push({ start: i, end: i + seg.length, color: t.color });
+		for (const m of text.matchAll(rx) as any) {
+			const fullIndex = m.index ?? 0;
+
+			// If we used the fallback boundary, the inner token is in m[1].
+			// For literal/regex tokens without our group, use m[0].
+			const inner = m[1] ?? m[0];
+			if (!inner) continue;
+
+			const start =
+				m[1] != null
+					? fullIndex + (m[0] as string).indexOf(m[1] as string)
+					: fullIndex;
+			const end = start + (inner as string).length;
+
+			segs.push({ start, end, color: (t as any).color });
 		}
 	});
+
 	return segs;
 }
 
@@ -71,6 +96,15 @@ export default function HighlightedText({
 	tokens: Token[];
 	className?: string;
 }) {
+	const s = useMemo(
+		() => resolveOverlaps(collectSegments(text, tokens)),
+		[text, tokens]
+	);
+
+	useEffect(() => {
+		console.table(s);
+	}, [s]);
+
 	if (!text || !tokens?.length)
 		return <span className={className}>{text}</span>;
 
@@ -87,8 +121,8 @@ export default function HighlightedText({
 			<mark
 				key={`t-${i}`}
 				style={{
-					backgroundColor: s.color,
-					padding: "0 2px",
+					backgroundColor: "red",
+					padding: "0 1px",
 					borderRadius: 3,
 				}}
 				className="text-black"
