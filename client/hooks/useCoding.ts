@@ -42,30 +42,30 @@ export default function useCoding(id: string) {
 	}, [dataset, rows]);
 
 	const parseRows = useCallback((keyCol: string, dSet: Dataset) => {
-		const out: Record<string, Row> = {};
+		const m = new Map<string, Row>();
 
-		for (const r of dSet?.rows || []) {
+		for (const r of dSet?.rows ?? []) {
 			const rec = r.data;
 			const keyVal = rec?.[keyCol];
-
 			if (!keyVal) continue;
 
 			const rest: RSS = { ...rec };
 			delete rest[keyCol];
 
 			const k = String(keyVal);
-			out[k] = {
+			m.set(k, {
 				data: rest,
 				id: r.id,
-				label: r.label,
+				label: r.label ?? "",
 				code: r.code,
 				theme: r.theme,
-                note: r.note,
+				note: r.note,
 				fileId: dSet.id,
-			};
+			});
 		}
-		setKeys(Object.keys(out));
-		setRows(out);
+
+		setKeys(Array.from(m.keys()));
+		setRows(Object.fromEntries(m));
 	}, []);
 
 	const loadDatasetAndConfig = useCallback(

@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ExternalLink, LucideHighlighter, SaveIcon } from "lucide-react";
 import { scrollbar } from "@/lib/utils";
 import Loader from "@/components/ui/Loader";
+import { RSS } from "@/types";
 
 const LabelDataset = () => {
 	const { id } = useParams<{ id: string }>();
@@ -27,6 +28,8 @@ const LabelDataset = () => {
 		updateLabel,
 		tokens,
 		isLoading,
+		stayOnPage,
+		setStayOnPage,
 	} = useLabel(id);
 
 	useEffect(() => {
@@ -124,29 +127,40 @@ const LabelDataset = () => {
 					>
 						<div className="grid grid-cols-[auto_1fr] w-full gap-y-0.5">
 							{keys.length > 0 && dataset?.selectedColumns
-								? Object.keys(
-										rows[keys[currentIndex]] ?? {}
-								  ).map((k, id) =>
-										[
-											...dataset?.selectedColumns,
-											"_label",
-										].includes(k) ? (
-											<React.Fragment key={id}>
-												<div className="min-w-[60px] text-center shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-300 dark:bg-gray-700 p-1">
-													{k}
-												</div>
-												<MarkdownViewer
-													tokens={tokens}
-													highlight={highlight}
-													markdown={
-														rows[
-															keys[currentIndex]
-														][k] ?? ""
-													}
-												/>
-											</React.Fragment>
-										) : null
-								  )
+								? (() => {
+										const row = rows[keys[currentIndex]];
+										if (!row) return null;
+
+										const display: RSS = {
+											...row.data,
+											_label: row.label ?? "",
+											_code: row.code ?? "",
+											_theme: row.theme ?? "",
+											_note: row.note ?? "",
+										};
+
+										// only render selected columns + extras
+										const allowed = new Set([
+											...dataset.selectedColumns,
+										]);
+
+										return Object.keys(display).map((k) =>
+											allowed.has(k) ? (
+												<React.Fragment key={k}>
+													<div className="min-w-[60px] text-center shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-300 dark:bg-gray-700 p-1">
+														{k}
+													</div>
+													<MarkdownViewer
+														tokens={tokens}
+														highlight={highlight}
+														markdown={
+															display[k] ?? ""
+														}
+													/>
+												</React.Fragment>
+											) : null
+										);
+								  })()
 								: null}
 						</div>
 					</div>
@@ -160,9 +174,10 @@ const LabelDataset = () => {
 									style={{ backgroundColor: l.color }}
 									onClick={() =>
 										updateLabel({
-											rowId: rows[keys[currentIndex]][
-												"rowId"
-											],
+											rowId:
+												String(
+													rows[keys[currentIndex]]?.id
+												) ?? "",
 											label: l.name,
 										})
 									}
@@ -188,6 +203,14 @@ const LabelDataset = () => {
 								}
 							>
 								<PlayIcon className="rotate-180" />
+							</Button>
+							<Button
+								onClick={() => setStayOnPage((p) => !p)}
+								className="border-2 border-gray-400 px-4 cursor-pointer text-xl"
+								variant={stayOnPage ? "default" : "ghost"}
+								title="Stay on page"
+							>
+								| |
 							</Button>
 							<Button
 								className="border-2 border-gray-400 p-2 cursor-pointer"

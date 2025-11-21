@@ -3,30 +3,39 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function useLabel(id: string) {
 	const [keys, setKeys] = useState<string[]>([]);
-	const [rows, setRows] = useState<Record<string, RSS>>({});
+	const [rows, setRows] = useState<Record<string, Row>>({});
 	const [dataset, setDataset] = useState<Dataset | undefined>(undefined);
 	const [currentIndex, setCurrentIndex] = useState<number>(0);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [processing, setProcessing] = useState<boolean>(false);
 	const [tokens, setTokens] = useState<Token[]>([]);
+	const [stayOnPage, setStayOnPage] = useState<boolean>(false);
 
 	const parseRows = useCallback((keyCol: string, dSet: Dataset) => {
-		const out: Record<string, RSS> = {};
+		const m = new Map<string, Row>();
 
-		for (const r of dSet?.rows || []) {
+		for (const r of dSet?.rows ?? []) {
 			const rec = r.data;
 			const keyVal = rec?.[keyCol];
-
 			if (!keyVal) continue;
 
 			const rest: RSS = { ...rec };
 			delete rest[keyCol];
 
 			const k = String(keyVal);
-			out[k] = { ...rest, rowId: String(r.id), _label: r.label };
+			m.set(k, {
+				data: rest,
+				id: r.id,
+				label: r.label ?? "",
+				code: r.code,
+				theme: r.theme,
+				note: r.note,
+				fileId: dSet.id,
+			});
 		}
-		setKeys(Object.keys(out));
-		setRows(out);
+
+		setKeys(Array.from(m.keys()));
+		setRows(Object.fromEntries(m));
 	}, []);
 
 	const loadDatasetAndConfig = useCallback(
@@ -64,7 +73,7 @@ export default function useLabel(id: string) {
 		[parseRows]
 	);
 	const getLabelStats = (
-		rows: Record<string, RSS>,
+		rows: Record<string, Row>,
 		labels: Label[],
 		unlabeledName = "Unlabeled",
 		unlabeledColor = "#9CA3AF",
@@ -72,7 +81,7 @@ export default function useLabel(id: string) {
 	): LabelStat[] => {
 		const counts = new Map<string, number>();
 		for (const k of Object.keys(rows)) {
-			const raw = (rows[k]._label ?? "").trim();
+			const raw = (rows[k].label ?? "").trim();
 			const key = raw || unlabeledName;
 			counts.set(key, (counts.get(key) ?? 0) + 1);
 		}
@@ -143,15 +152,17 @@ export default function useLabel(id: string) {
 			delete rest[keyCol];
 
 			const k = String(keyVal);
-			const newRow: RSS = {
-				...rest,
-				rowId: String(row.id),
-				_label: row.label ?? "",
+			const newRow: Row = {
+				fileId: dataset.id,
+				data: rest,
+				id: row.id,
+				label: row.label ?? "",
 			};
 
 			console.log(newRow);
 			setRows((prev) => ({ ...prev, [k]: newRow }));
-			setCurrentIndex((p) => Math.min(p + 1, keys.length - 1));
+			if (!stayOnPage)
+				setCurrentIndex((p) => Math.min(p + 1, keys.length - 1));
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -213,6 +224,8 @@ export default function useLabel(id: string) {
 		tokens,
 		exportCSV,
 		getLabelStats,
-        processing
+		processing,
+		stayOnPage,
+		setStayOnPage,
 	};
 }

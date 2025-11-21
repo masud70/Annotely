@@ -8,7 +8,9 @@ export const labelService = {
 			const result = await db.file.findUniqueOrThrow({
 				include: {
 					labels: true,
-					rows: true,
+					rows: {
+						orderBy: { rowIndex: "asc" },
+					},
 					_count: { select: { rows: true } },
 				},
 				where: { id },
