@@ -8,7 +8,12 @@ import { ExportDataset } from "@/components/ExportDataset";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ExternalLink, Fullscreen, LucideHighlighter, SaveIcon } from "lucide-react";
+import {
+	ExternalLink,
+	Fullscreen,
+	LucideHighlighter,
+	SaveIcon,
+} from "lucide-react";
 import { scrollbar } from "@/lib/utils";
 import Loader from "@/components/ui/Loader";
 import { RSS } from "@/types";
@@ -98,9 +103,34 @@ const LabelDataset = () => {
 					<div className="w-full bg-transparent h-[40px] items-center flex justify-between px-2 space-x-2 border-y-2 border-gray-400">
 						<div className="min-w-[80px] flex gap-1">
 							Row:{" "}
-							<p className="bg-gray-400 dark:bg-gray-700 px-1 rounded-md">{`${
-								currentIndex + 1
-							}/${keys.length}`}</p>
+							<p className="bg-gray-400 w-fit dark:bg-gray-700 pr-1 rounded-md flex">
+								<input
+									className="bg-background/25 rounded-md mr-1 focus:outline-2"
+									defaultValue={currentIndex + 1}
+									style={{
+										width: `${Math.max(
+											String(currentIndex).length + 1,
+											3
+										)}ch`,
+										textAlign: "center",
+									}}
+									onKeyUp={(e) => {
+										if (e.key === "Enter") {
+											const num = Number(
+												e.currentTarget.value
+											);
+
+											setCurrentIndex(
+												Math.min(
+													Math.max(num - 1, 0),
+													keys.length - 1
+												)
+											);
+										}
+									}}
+								/>
+								/ {keys.length}
+							</p>
 						</div>
 						<div className="flex space-x-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]">
 							{stats.map((s, id) => (
@@ -133,7 +163,7 @@ const LabelDataset = () => {
 								<p className="hidden md:block">Export file</p>
 								<SaveIcon scale={0.5} size={20} />
 							</button>
-                            <button
+							<button
 								onClick={toggleFullscreen}
 								className="shrink-0 flex gap-1 items-center cursor-pointer hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400 "
 							>
