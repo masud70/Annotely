@@ -24,7 +24,7 @@ import {
 	PlusCircleIcon,
 	SaveIcon,
 } from "lucide-react";
-import { scrollbar } from "@/lib/utils";
+import { noScrollbar, scrollbar } from "@/lib/utils";
 import useCoding from "@/hooks/useCoding";
 import { CodeInput } from "@/components/CodeInput";
 import Loader from "@/components/ui/Loader";
@@ -124,9 +124,14 @@ const CodeDataset = () => {
 				<div className="flex-1 flex flex-col min-h-0 h-full overflow-hidden min-w-0 bg-transparent">
 					{/* div2 */}
 					<div className="w-full bg-transparent h-[40px] items-center flex justify-between px-2 space-x-2 border-y-2 border-gray-400">
-						<div className="min-w-[80px] flex gap-1">
+						<div
+							className={
+								"min-w-fit overflow-x-auto flex gap-1" +
+								noScrollbar
+							}
+						>
 							Row:{" "}
-							<p className="bg-gray-400 w-fit dark:bg-gray-700 pr-1 rounded-md flex">
+							<p className="bg-gray-400 dark:bg-gray-700 pr-1 rounded-md flex min-w-fit">
 								<input
 									className="bg-background/25 rounded-md mr-1 focus:outline-2"
 									defaultValue={currentIndex + 1}
@@ -152,7 +157,9 @@ const CodeDataset = () => {
 										}
 									}}
 								/>
-								/ {keys.length}
+								<span className="min-w-fit">{`/ ${String(
+									keys.length
+								)}`}</span>
 							</p>
 						</div>
 						{/* <div className="flex space-x-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]">
