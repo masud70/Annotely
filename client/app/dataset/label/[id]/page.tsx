@@ -8,7 +8,7 @@ import { ExportDataset } from "@/components/ExportDataset";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ExternalLink, LucideHighlighter, SaveIcon } from "lucide-react";
+import { ExternalLink, Fullscreen, LucideHighlighter, SaveIcon } from "lucide-react";
 import { scrollbar } from "@/lib/utils";
 import Loader from "@/components/ui/Loader";
 import { RSS } from "@/types";
@@ -18,6 +18,7 @@ const LabelDataset = () => {
 	const [open, setOpen] = useState(false);
 	const [highlight, setHighlight] = useState<boolean>(true);
 	const selectedItemRef = useRef<HTMLDivElement | null>(null);
+	const boxRef = useRef<HTMLDivElement | null>(null);
 	const {
 		dataset,
 		rows,
@@ -32,6 +33,25 @@ const LabelDataset = () => {
 		setStayOnPage,
 	} = useLabel(id);
 
+	const toggleFullscreen = async () => {
+		if (typeof document === "undefined") return;
+		if (!document.fullscreenElement) {
+			if (boxRef.current) {
+				try {
+					await boxRef.current.requestFullscreen();
+				} catch (err) {
+					console.error("Error attempting fullscreen:", err);
+				}
+			}
+		} else {
+			try {
+				await document.exitFullscreen();
+			} catch (err) {
+				console.error("Error exiting fullscreen:", err);
+			}
+		}
+	};
+
 	useEffect(() => {
 		selectedItemRef.current?.scrollIntoView({
 			block: "nearest",
@@ -44,7 +64,10 @@ const LabelDataset = () => {
 	return (
 		<>
 			<Loader global show={isLoading} transparency={100} />
-			<div className="w-full flex h-full bg-gray-300 dark:bg-gray-800">
+			<div
+				ref={boxRef}
+				className="w-full flex h-full bg-gray-300 dark:bg-gray-800"
+			>
 				<div className="min-w-[150px] shrink-0 h-full  flex flex-col">
 					<div className="bg-transparent w-full items-center flex justify-center min-h-[40px] max-h-[40px] border-y-2 border-gray-400">
 						Key Column
@@ -109,6 +132,13 @@ const LabelDataset = () => {
 							>
 								<p className="hidden md:block">Export file</p>
 								<SaveIcon scale={0.5} size={20} />
+							</button>
+                            <button
+								onClick={toggleFullscreen}
+								className="shrink-0 flex gap-1 items-center cursor-pointer hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400 "
+							>
+								<p className="hidden md:block">Full Screen</p>
+								<Fullscreen scale={0.5} size={20} />
 							</button>
 							<Link
 								href={"/"}
