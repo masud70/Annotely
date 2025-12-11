@@ -294,7 +294,7 @@ const LabelDataset = () => {
 									variant={stayOnPage ? "default" : "ghost"}
 									title="Stay on page"
 								>
-									<span className="pb-1.5">| |</span>
+									| |
 								</Button>
 								<Button
 									className="border-2 border-gray-400 p-2 cursor-pointer"
