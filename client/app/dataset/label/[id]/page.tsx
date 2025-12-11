@@ -185,15 +185,6 @@ const LabelDataset = () => {
 									</p>
 									<Fullscreen scale={0.5} size={20} />
 								</button>
-								<button
-									onClick={toggleFullscreen}
-									className="shrink-0 flex gap-1 items-center cursor-pointer hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400 "
-								>
-									<p className="hidden md:block">
-										Full Screen
-									</p>
-									<Fullscreen scale={0.5} size={20} />
-								</button>
 								<Link
 									href={"/"}
 									className="shrink-0 gap-1 flex items-center hover:bg-gray-600 bg-gray-600/50 rounded-md px-2 py-0.5 duration-400"
