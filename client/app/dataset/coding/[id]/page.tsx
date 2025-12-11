@@ -157,7 +157,7 @@ const CodeDataset = () => {
 									}
 								/>
 								<span className="min-w-fit">{`/ ${String(
-									keys.length
+									keys.length-1
 								)}`}</span>
 							</p>
 						</div>
