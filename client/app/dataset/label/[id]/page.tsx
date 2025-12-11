@@ -115,7 +115,7 @@ const LabelDataset = () => {
 								<p className="bg-gray-400 dark:bg-gray-700 pr-1 rounded-md flex min-w-fit">
 									<input
 										className="bg-background/25 rounded-md mr-1 focus:outline-2"
-										defaultValue={currentIndex + 1}
+										value={currentIndex}
 										style={{
 											width: `${Math.max(
 												String(currentIndex).length + 1,
@@ -123,20 +123,20 @@ const LabelDataset = () => {
 											)}ch`,
 											textAlign: "center",
 										}}
-										onKeyUp={(e) => {
-											if (e.key === "Enter") {
-												const num = Number(
-													e.currentTarget.value
-												);
-
-												setCurrentIndex(
-													Math.min(
-														Math.max(num - 1, 0),
-														keys.length - 1
-													)
-												);
-											}
-										}}
+										onChange={(e) =>
+											setCurrentIndex(
+												Math.min(
+													Math.max(
+														Number(
+															e.currentTarget
+																.value
+														),
+														0
+													),
+													keys.length - 1
+												)
+											)
+										}
 									/>
 									<span className="min-w-fit">{`/ ${String(
 										keys.length
