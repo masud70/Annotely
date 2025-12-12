@@ -1,22 +1,19 @@
-// src/controller/filesController.ts
+// src/controller/datasetController.ts (CJS)
 import type { Request, Response, NextFunction } from "express";
-import {
-	datasetService,
-	getRowByName,
-	listUploadedFiles,
-	saveRowConfig,
-} from "../service/datasetService.ts";
+import { saveRowConfig } from "../service/datasetService";
+const datasetService = require("../service/datasetService");
+const getRowByName = require("../service/datasetService");
+export {}; // ✅ force module scope
 
-export const datasetController = {
+const datasetController = {
 	uploadDataset: async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			console.log(req.body);
 			const result = await datasetService.saveDataset({
-				rows: req.body.parsed.rows,
+				rows: (req.body as any).parsed.rows,
 				file: req.file!,
 			});
-			if (result.ok) res.json(result);
-			else next("Dataset saving failed");
+			if (result.ok) return res.json(result);
+			return next(new Error("Dataset saving failed"));
 		} catch (error) {
 			next(error);
 		}
@@ -25,10 +22,7 @@ export const datasetController = {
 	getAllDataset: async (_req: Request, res: Response, next: NextFunction) => {
 		try {
 			const result = await datasetService.getAllDataset();
-			res.json({
-				ok: true,
-				data: result,
-			});
+			return res.json({ ok: true, data: result });
 		} catch (error) {
 			next(error);
 		}
@@ -36,14 +30,14 @@ export const datasetController = {
 
 	getDatasetById: async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const result = await datasetService.getDatasetById(
-				parseInt(req.params.id)
-			);
-			console.log(result);
-			res.json({
-				ok: true,
-				data: result,
-			});
+			const id = Number(req.params.id);
+			if (!Number.isFinite(id)) {
+				return res
+					.status(400)
+					.json({ ok: false, error: "Invalid dataset id" });
+			}
+			const result = await datasetService.getDatasetById(id);
+			return res.json({ ok: true, data: result });
 		} catch (error) {
 			next(error);
 		}
@@ -56,15 +50,17 @@ export const datasetController = {
 	) => {
 		try {
 			const id = Number(req.params.id);
-			if (!Number.isFinite(id)) next("Invalid id");
+			if (!Number.isFinite(id)) {
+				return res.status(400).json({ ok: false, error: "Invalid id" });
+			}
 
-			const { fileId, ...body } = req.body;
+			const { fileId: _fileId, ...body } = (req.body ?? {}) as any;
 			const result = await datasetService.updateDatasetConfig({
 				fileId: id,
 				body,
 			});
 
-			res.json({ ok: true, data: result });
+			return res.json({ ok: true, data: result });
 		} catch (e) {
 			next(e);
 		}
@@ -73,29 +69,32 @@ export const datasetController = {
 	exportFile: async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const id = Number(req.params.id);
-			const { columns, start, end } = req.body as {
+			const { columns, start, end } = (req.body ?? {}) as {
 				columns: string[];
 				start: number;
 				end: number;
 			};
 
-			if (!Number.isFinite(id))
+			if (!Number.isFinite(id)) {
 				return res
 					.status(400)
 					.json({ ok: false, error: "Invalid dataset id" });
-			if (!Array.isArray(columns) || !columns.length)
+			}
+			if (!Array.isArray(columns) || columns.length === 0) {
 				return res
 					.status(400)
 					.json({ ok: false, error: "columns[] required" });
+			}
 			if (
 				!Number.isFinite(start) ||
 				!Number.isFinite(end) ||
 				start < 0 ||
 				end < start
-			)
+			) {
 				return res
 					.status(400)
 					.json({ ok: false, error: "Invalid start/end" });
+			}
 
 			const { filename, csv } = await datasetService.exportAsCSV({
 				fileId: id,
@@ -109,7 +108,7 @@ export const datasetController = {
 				"Content-Disposition",
 				`attachment; filename="${filename}"`
 			);
-			res.status(200).send(csv);
+			return res.status(200).send(csv);
 		} catch (error) {
 			next(error);
 		}
@@ -118,47 +117,46 @@ export const datasetController = {
 	deleteDataset: async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const id = Number(req.params.id);
-			if (!Number.isFinite(id)) next("Invalid file id");
+			if (!Number.isFinite(id)) {
+				return res
+					.status(400)
+					.json({ ok: false, error: "Invalid file id" });
+			}
 
 			const result = await datasetService.deleteDataset(id);
-
-			res.json({ ok: true, data: result });
+			return res.json({ ok: true, data: result });
 		} catch (e) {
 			next(e);
 		}
 	},
 };
 
-export async function getAllUploads(
-	_req: Request,
-	res: Response,
-	next: NextFunction
-) {
+async function getAllUploads(_req: Request, res: Response, next: NextFunction) {
 	try {
-		const data = await listUploadedFiles();
-		res.json({ ok: true, data });
+		const data = await datasetService.listUploadedFiles();
+		return res.json({ ok: true, data });
 	} catch (err) {
 		next(err);
 	}
 }
 
-export async function getConfigure(
-	req: Request,
-	res: Response,
-	next: NextFunction
-) {
+async function getConfigure(req: Request, res: Response, next: NextFunction) {
 	try {
 		const name = String(req.query.name ?? "");
 		const row = Number(req.query.row ?? -1);
+
 		if (!name || row < 0 || Number.isNaN(row)) {
 			return res.status(400).json({
 				ok: false,
 				error: "Query params 'name' and valid 'row' are required",
 			});
 		}
+
 		const { row: rowData, columns, saved } = await getRowByName(name, row);
-		if (!rowData)
+		if (!rowData) {
 			return res.status(404).json({ ok: false, error: "Row not found" });
+		}
+
 		return res.json({
 			ok: true,
 			data: { name, row, columns, rowData, saved },
@@ -168,13 +166,10 @@ export async function getConfigure(
 	}
 }
 
-export async function postConfigure(
-	req: Request,
-	res: Response,
-	next: NextFunction
-) {
+async function postConfigure(req: Request, res: Response, next: NextFunction) {
 	try {
-		const { name, row, data } = req.body ?? {};
+		const { name, row, data } = (req.body ?? {}) as any;
+
 		if (
 			!name ||
 			typeof row !== "number" ||
@@ -187,6 +182,7 @@ export async function postConfigure(
 				error: "Body must include { name, row, data }",
 			});
 		}
+
 		const saved = await saveRowConfig(
 			String(name),
 			Number(row),
@@ -197,3 +193,10 @@ export async function postConfigure(
 		next(e);
 	}
 }
+
+module.exports = {
+	datasetController,
+	getAllUploads,
+	getConfigure,
+	postConfigure,
+};

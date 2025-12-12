@@ -1,26 +1,30 @@
-// src/middleware/index.ts
+// src/middleware/index.ts (CJS)
 import type {
 	Request,
 	Response,
 	NextFunction,
 	ErrorRequestHandler,
 	RequestHandler,
+	Express,
 } from "express";
-import multer from "multer";
-import fs from "node:fs";
-import path from "node:path";
-import { parse as csvParse } from "csv-parse";
-import { CsvRow, ParsedCsv } from "../types/index.ts";
+import type { CsvRow, ParsedCsv } from "../types"; // ✅ no .ts extension
+
+export {}; // ✅ ensure this file is treated as a module (avoids redeclare issues)
+
+const multer = require("multer");
+const fs = require("node:fs");
+const path = require("node:path");
+const { parse: csvParse } = require("csv-parse");
 
 const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const memStorage = multer.memoryStorage();
 const storage = multer.diskStorage({
-	destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-	filename: (_req, file, cb) => {
+	destination: (_req: Request, _file: any, cb: any) => cb(null, UPLOAD_DIR),
+	filename: (_req: Request, file: any, cb: any) => {
 		const ts = Date.now();
-		const safe = file.originalname.replace(/[^\w.\-]+/g, "_");
+		const safe = String(file.originalname).replace(/[^\w.\-]+/g, "_");
 		cb(null, `${ts}__${safe}`);
 	},
 });
@@ -29,35 +33,34 @@ const ACCEPT = new Set([
 	"text/csv",
 	"application/json",
 	"application/vnd.apache.parquet",
-	"application/octet-stream", // some browsers send parquet as octet-stream
+	"application/octet-stream",
 ]);
 
 const uploader = multer({
 	storage,
 	limits: { fileSize: 50 * 1024 * 1024, files: 5 },
-	fileFilter: (_req, file, cb) => {
-		if (!ACCEPT.has(file.mimetype))
+	fileFilter: (_req: Request, file: any, cb: any) => {
+		if (!ACCEPT.has(file.mimetype)) {
+			return cb(new Error(`Unsupported file type: ${file.mimetype}`));
+		}
+		cb(null, true);
+	},
+});
+
+const csvUploader = multer({
+	storage: memStorage,
+	limits: { fileSize: 50 * 1024 * 1024, files: 1 },
+	fileFilter: (_req: Request, file: any, cb: any) => {
+		const ok =
+			file.mimetype === "text/csv" ||
+			String(file.originalname).toLowerCase().endsWith(".csv");
+		if (!ok)
 			return cb(new Error(`Unsupported file type: ${file.mimetype}`));
 		cb(null, true);
 	},
 });
-const csvUploader = multer({
-	storage: memStorage,
-	limits: {
-		fileSize: 50 * 1024 * 1024, // 50MB
-		files: 1,
-	},
-	fileFilter: (_req, file, cb) => {
-		const ok =
-			file.mimetype === "text/csv" ||
-			file.originalname.toLowerCase().endsWith(".csv");
-		if (!ok)
-			return cb(new Error(`Unsupported file type: ${file.mimetype}`));
-		else cb(null, true);
-	},
-});
 
-export const commonMiddleware: {
+const commonMiddleware: {
 	errorMiddleware: ErrorRequestHandler;
 	uploadFile: RequestHandler;
 	uploadInMemory: RequestHandler;
@@ -80,9 +83,10 @@ export const commonMiddleware: {
 		try {
 			const file = req.file as Express.Multer.File | undefined;
 			if (!file) return next(new Error("No uploaded file to parse"));
+
 			const parsed = await commonMiddleware.parseCsvBuffer(file.buffer);
-			// attach to body in a typed-safe-ish way without global augmentation
 			(req.body as { parsed?: ParsedCsv }).parsed = parsed;
+
 			next();
 		} catch (e) {
 			next(e);
@@ -95,15 +99,15 @@ export const commonMiddleware: {
 				buf.toString("utf8"),
 				{
 					bom: true,
-					columns: true, // first row = header
+					columns: true,
 					skip_empty_lines: true,
 					trim: true,
 					relax_column_count: true,
 				},
-				(err, records: CsvRow[]) => {
+				(err: any, records: CsvRow[]) => {
 					if (err) return reject(err);
 					const columns = records.length
-						? Object.keys(records[0])
+						? Object.keys(records[0] as any)
 						: [];
 					resolve({ rows: records, columns });
 				}
@@ -123,17 +127,17 @@ export const commonMiddleware: {
 				count: files.length,
 				files: files.map((f) => ({
 					field: f.fieldname,
-					filename: f.filename,
+					filename: (f as any).filename,
 					originalname: f.originalname,
 					mimetype: f.mimetype,
 					size: f.size,
-					path: f.path,
+					path: (f as any).path,
 				})),
 			});
 		});
 	},
 
-	errorMiddleware: (err: any, _req, res, _next) => {
+	errorMiddleware: (err: any, _req: any, res: any, _next: any) => {
 		console.error("Error:", err);
 		res.status(400).json({
 			ok: false,
@@ -141,3 +145,5 @@ export const commonMiddleware: {
 		});
 	},
 };
+
+module.exports = { commonMiddleware };

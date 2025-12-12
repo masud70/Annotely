@@ -1,8 +1,8 @@
 // ./src/service/labelService.ts
 
-import { db } from "../lib/db.ts";
+const { db } = require("../lib/db");
 
-export const labelService = {
+module.exports = {
 	getDatasetAndConfigById: async (id: number) => {
 		try {
 			const result = await db.file.findUniqueOrThrow({

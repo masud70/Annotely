@@ -1,13 +1,12 @@
 // src/service/filesService.ts
-import fs from "node:fs";
-import fsp from "node:fs/promises";
-import path from "node:path";
-import { parse as csvParse } from "csv-parse";
-// @ts-expect-error no types for parquetjs-lite
-import * as parquet from "parquetjs-lite";
-import { FileSummary, FileType, RSS } from "../types/index.ts";
-import { db } from "../lib/db.ts";
-import { chunk, esc } from "../lib/utils.ts";
+const fs = require("node:fs");
+const fsp = require("node:fs/promises");
+const path = require("node:path");
+const csvParse = require("csv-parse");
+const parquet = require("parquetjs-lite");
+import type { FileSummary, FileType, RSS } from "../types/index";
+const { db } = require("../lib/db");
+const { chunk, esc } = require("../lib/utils");
 
 const UPLOAD_DIR = path.join(
 	process.cwd(),
@@ -15,7 +14,7 @@ const UPLOAD_DIR = path.join(
 );
 const CONFIG_DIR = path.join(UPLOAD_DIR, process.env.CONFIG_PATH || "config");
 
-export const datasetService = {
+module.exports = {
 	saveDataset: async ({
 		rows,
 		file,
@@ -116,7 +115,7 @@ export const datasetService = {
 				orderBy: { uploadedAt: "desc" },
 			});
 
-			return files.map((f) => ({
+			return files.map((f: any) => ({
 				id: f.id,
 				fileName: f.fileName,
 				rowCount: f._count.rows,
@@ -169,8 +168,8 @@ export const datasetService = {
 				data: {
 					...data,
 					keywords: keywords.map((k: string) => k.trim()),
-                    selectedColumns,
-                    keyColumn,
+					selectedColumns,
+					keyColumn,
 					configured: true,
 				},
 			});
@@ -244,7 +243,7 @@ export const datasetService = {
 
 			const header = columns.map(esc).join(",") + "\r\n";
 			const body = rows
-				.map((r) => {
+				.map((r: any) => {
 					const rec = r.data as Record<string, unknown>;
 					rec._label = r.label ?? "";
 					rec._code = r.code ?? "";
@@ -348,7 +347,9 @@ async function summarizeJSON(
 		}
 	} catch {
 		// Maybe JSONL/NDJSON
-		const lines = raw.split(/\r?\n/).filter((l) => l.trim().length > 0);
+		const lines = raw
+			.split(/\r?\n/)
+			.filter((l: any) => l.trim().length > 0);
 		rows = 0;
 		const keys = new Set<string>();
 		for (const l of lines.slice(0, 200)) {

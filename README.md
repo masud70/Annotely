@@ -1,11 +1,6 @@
 # Annotely
 
-Annotely is a two-part application for qualitative data annotation. The Next.js
-client lets researchers upload structured datasets (CSV, JSON/JSONL, Parquet),
-configure which columns matter, highlight keywords, assign labels, and capture
-multi-value codes/themes for every row. The Express/Prisma backend persists
-uploads in MySQL, keeps the raw file on disk, and exposes a REST API for
-labeling, coding, and exporting filtered slices of the dataset.
+Annotely is a two-part application for qualitative data annotation. The Next.js client lets researchers upload structured datasets (CSV, JSON/JSONL, Parquet), configure which columns matter, highlight keywords, assign labels, and capture multi-value codes/themes for every row. The Express/Prisma backend persists uploads in MySQL, keeps the raw file on disk, and exposes a REST API for labeling, coding, and exporting filtered slices of the dataset.
 
 ## Highlights
 
@@ -84,33 +79,27 @@ for most requests and `NEXT_PUBLIC_API_BASE_URL` inside the CSV export helpers.
 git clone <repo-url>
 cd Annotely
 
-# Root deps (concurrently)
-pnpm install
+# Install dependencies
+npm run i
 
-# Client app
-cd client
-pnpm install
-cd ..
-
-# Server API
-cd server
-pnpm install
-pnpm prisma generate
-pnpm prisma migrate dev      # applies migrations to DATABASE_URL
-cd ..
+# Setup database
+npm run db
 ```
-
-> Prefer pnpm. If you must use npm, replace `pnpm` with `npm install`, `npx
-> prisma`, etc.
 
 ## Running the Apps
 
-### Development (recommended)
+### Development Server
 
 From the repository root:
-
 ```bash
-pnpm dev
+npm run dev
+```
+
+### Build Version
+
+From the repository root:
+```bash
+npm start
 ```
 
 This runs both:
@@ -122,12 +111,12 @@ This runs both:
 
 ```bash
 # client/
-pnpm dev        # or pnpm build && pnpm start
+npm dev        # or pnpm build && pnpm start
 
 # server/
-pnpm dev        # tsx watch src/server.ts
-pnpm build
-pnpm start
+npm dev        # tsx watch src/server.ts
+npm build
+npm start
 ```
 
 ## Typical Workflow

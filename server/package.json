@@ -4,8 +4,8 @@
 	"description": "Data labeler application backend",
 	"license": "ISC",
 	"author": "Md. Masud Mazumder",
-	"type": "module",
-	"main": "server.ts",
+	"type": "commonjs",
+	"main": "dist/server.js",
 	"scripts": {
 		"dev": "tsx watch src/server.ts",
 		"build": "tsc",

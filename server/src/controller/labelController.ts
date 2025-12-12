@@ -1,22 +1,27 @@
-// ./src/service/labelController.ts
-import { NextFunction, Request, Response } from "express";
-import { labelService } from "../service/labelService.ts";
+// src/controller/labelController.ts (CJS)
+import type { NextFunction, Request, Response } from "express";
+export {}; // ✅ force module scope
 
-export const labelController = {
+const labelService  = require("../service/labelService");
+
+const labelController = {
 	getDatasetAndConfig: async (
 		req: Request,
 		res: Response,
 		next: NextFunction
 	) => {
 		try {
-			const datasetId = parseInt(req.params.id);
+			const datasetId = Number(req.params.id);
+			if (!Number.isFinite(datasetId)) {
+				return res
+					.status(400)
+					.json({ ok: false, error: "Invalid dataset id" });
+			}
+
 			const result = await labelService.getDatasetAndConfigById(
 				datasetId
 			);
-			res.json({
-				ok: true,
-				data: result,
-			});
+			return res.json({ ok: true, data: result });
 		} catch (error) {
 			next(error);
 		}
@@ -25,10 +30,7 @@ export const labelController = {
 	updateLabel: async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const result = await labelService.updateLabel(req.body);
-			res.json({
-				ok: true,
-				data: result,
-			});
+			return res.json({ ok: true, data: result });
 		} catch (error) {
 			next(error);
 		}
@@ -37,10 +39,7 @@ export const labelController = {
 	updateCode: async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const result = await labelService.updateCode(req.body);
-			res.json({
-				ok: true,
-				data: result,
-			});
+			return res.json({ ok: true, data: result });
 		} catch (error) {
 			next(error);
 		}
@@ -49,24 +48,21 @@ export const labelController = {
 	updateTheme: async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const result = await labelService.updateTheme(req.body);
-			res.json({
-				ok: true,
-				data: result,
-			});
+			return res.json({ ok: true, data: result });
 		} catch (error) {
 			next(error);
 		}
 	},
+
 	updateNote: async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const result = await labelService.updateNote(req.body);
-            console.log(result);
-			res.json({
-				ok: true,
-				data: result,
-			});
+			console.log(result);
+			return res.json({ ok: true, data: result });
 		} catch (error) {
 			next(error);
 		}
 	},
 };
+
+module.exports = { labelController };

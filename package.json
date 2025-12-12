@@ -2,7 +2,11 @@
 	"name": "my-fullstack-app",
 	"private": true,
 	"scripts": {
-		"dev": "concurrently -k -n client,server -c green,red \"npm run dev --prefix ./client\" \"npm run dev --prefix ./server\""
+		"dev": "concurrently -k -n client,server -c green,red \"npm run dev --prefix ./client\" \"npm run dev --prefix ./server\"",
+        "start": "concurrently -k -n client,server -c green,red \"npm run start --prefix ./client\" \"npm run start --prefix ./server\"",
+		"i": "npm install && npm install --prefix ./client && npm install --prefix ./server",
+        "build": "npm run build --prefix ./client && npm run build --prefix ./server",
+        "db": "npm prisma generate --prefix ./server && npm prisma migrate dev --prefix ./server"
 	},
 	"devDependencies": {
 		"concurrently": "^9.2.1"
