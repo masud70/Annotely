@@ -53,25 +53,27 @@ export const CodeInput = ({
 		);
 
 		const q = (input ?? "").trim().toLowerCase();
-		if (!q) return base.slice(0, 12);
-		return base.filter((s) => s.toLowerCase().includes(q)).slice(0, 12);
+		if (!q) return base.slice(0, 15);
+		const suggested = base.filter((s) => s.toLowerCase().includes(q));
+		return [...new Set([q, ...suggested].slice(0, 15))];
 	}, [input, normSuggestions, values]);
 
 	useEffect(() => {
-		setActive(0);
+		if (input?.trim().length) setActive(0);
+		else setActive(-1);
 	}, [input, filtered.length]);
 
-	const addValue = (v: string) => {
+	const addValue = async (v: string) => {
 		const val = v.trim();
 		if (!val) return;
 		if (!values.includes(val)) setValues((prev) => [...prev, val]);
 		setInput("");
 		setOpen(false);
-		onSave({ rowId, values });
+		await onSave({ rowId, values });
 	};
 
-	const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-		const data = [input, ...filtered];
+	const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		const data = [...filtered];
 		if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
 			if (data.length) setOpen(true);
 			return;
@@ -116,11 +118,11 @@ export const CodeInput = ({
 						scrollbar
 					}
 				>
-					{[input, ...filtered].map(
+					{filtered.map(
 						(s, i) =>
 							s?.trim() && (
 								<li
-									key={s}
+									key={`${s}-${i}`}
 									role="option"
 									aria-selected={i === active}
 									tabIndex={-1}

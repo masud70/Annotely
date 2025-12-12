@@ -237,14 +237,30 @@ const CodeDataset = () => {
 										// only render selected columns + extras
 										const allowed = new Set([
 											...dataset.selectedColumns,
+											"_note",
+										]);
+
+										const tags = new Set([
 											"_label",
 											"_code",
 											"_theme",
-											"_note",
 										]);
 
 										return Object.keys(display).map((k) =>
 											allowed.has(k) ? (
+												<React.Fragment key={k}>
+													<div className="min-w-[60px] text-center shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-300 dark:bg-gray-700 p-1">
+														{k}
+													</div>
+													<MarkdownViewer
+														tokens={tokens}
+														highlight={highlight}
+														markdown={
+															display[k] ?? ""
+														}
+													/>
+												</React.Fragment>
+											) : tags.has(k) ? (
 												<React.Fragment key={k}>
 													<div className="min-w-[60px] text-center shrink-0 max-w-[120px] lg:max-w-[150px] bg-gray-300 dark:bg-gray-700 p-1">
 														{k}
