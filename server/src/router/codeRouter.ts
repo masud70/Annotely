@@ -1,7 +1,7 @@
 // src/router/codeRouter.ts
 export {};
 const { Router } = require("express");
-const { labelController } = require("../controller/labelController");
+const labelController = require("../controller/labelController");
 
 const codeRouter = Router();
 

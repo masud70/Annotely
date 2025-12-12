@@ -2,7 +2,7 @@
 export {}; // ✅ force module scope (prevents redeclare errors)
 
 const { Router } = require("express");
-const { labelController } = require("../controller/labelController");
+const labelController = require("../controller/labelController");
 
 const labelRouter = Router();
 

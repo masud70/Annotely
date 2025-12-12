@@ -3,7 +3,6 @@ import MarkdownViewer from "@/components/MarkdownView";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@/components/ui/icons/akar-icons-play";
 import { useParams } from "next/navigation";
-import { marked } from "marked";
 import { ExportDataset } from "@/components/ExportDataset";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -352,9 +351,7 @@ const CodeDataset = () => {
 						<div className="flex-1 grid grid-cols-1 lg:grid-cols-2 lg:flex-row items-center justify-center gap-x-2 w-full lg:w-[70%]">
 							<CodeInput
 								placeholder="Add new code..."
-								key={`${rows[keys[currentIndex]]?.id}:${
-									rows[keys[currentIndex]]?.code ?? "code"
-								}`}
+								key={`${rows[keys[currentIndex]]?.id}:code`}
 								defaultValues={
 									rows[keys[currentIndex]]?.code ?? ""
 								}
@@ -364,9 +361,7 @@ const CodeDataset = () => {
 							/>
 							<CodeInput
 								placeholder="Add new theme..."
-								key={`${rows[keys[currentIndex]]?.id}:${
-									rows[keys[currentIndex]]?.theme ?? "theme"
-								}`}
+								key={`${rows[keys[currentIndex]]?.id}:theme`}
 								defaultValues={
 									rows[keys[currentIndex]]?.theme ?? ""
 								}

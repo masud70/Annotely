@@ -3,9 +3,8 @@ export {}; // ✅ prevent global-script redeclare issues in TS
 
 const { Router } = require("express");
 const {
-  datasetController,
-  getConfigure,
-  postConfigure, // (you import it but don't use it—keep/remove as you like)
+	datasetController,
+	getConfigure,
 } = require("../controller/datasetController");
 const { commonMiddleware } = require("../middleware");
 
@@ -17,10 +16,10 @@ datasetRouter.get("/", datasetController.getAllDataset);
 
 // datasetRouter.post("/upload", commonMiddleware.uploadFile);
 datasetRouter.post(
-  "/upload",
-  commonMiddleware.uploadInMemory,
-  commonMiddleware.parseCsvSingle,
-  datasetController.uploadDataset
+	"/upload",
+	commonMiddleware.uploadInMemory,
+	commonMiddleware.parseCsvSingle,
+	datasetController.uploadDataset
 );
 
 datasetRouter.get("/config", getConfigure);

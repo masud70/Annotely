@@ -5,7 +5,6 @@ import type {
 	NextFunction,
 	ErrorRequestHandler,
 	RequestHandler,
-	Express,
 } from "express";
 import type { CsvRow, ParsedCsv } from "../types"; // ✅ no .ts extension
 

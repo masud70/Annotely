@@ -4,7 +4,7 @@ export {}; // ✅ force module scope
 
 const labelService  = require("../service/labelService");
 
-const labelController = {
+module.exports = {
 	getDatasetAndConfig: async (
 		req: Request,
 		res: Response,
@@ -64,5 +64,3 @@ const labelController = {
 		}
 	},
 };
-
-module.exports = { labelController };
