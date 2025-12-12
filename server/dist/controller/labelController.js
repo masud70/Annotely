@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const labelService = require("../service/labelService");
-const labelController = {
+module.exports = {
     getDatasetAndConfig: async (req, res, next) => {
         try {
             const datasetId = Number(req.params.id);
@@ -55,5 +55,4 @@ const labelController = {
         }
     },
 };
-module.exports = { labelController };
 //# sourceMappingURL=labelController.js.map
