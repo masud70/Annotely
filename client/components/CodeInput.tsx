@@ -180,6 +180,11 @@ export const CodeInput = ({
 						}}
 						onClick={() => setOpen(true)}
 						onKeyDown={onKeyDown}
+						onKeyUp={async (k) => {
+							if (k.key === "Enter") {
+								await onSave({ rowId: rowId, values: values });
+							}
+						}}
 					/>
 				</TagsInputList>
 				<div className="grid">

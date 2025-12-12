@@ -40,13 +40,19 @@ export default function MarkdownViewer({
 			>
 				{markdown}
 			</ReactMarkdown>
-			<div
-				onClick={handleCopy}
-				className="text-white opacity-20 hover:opacity-100 flex items-center gap-1 bg-gray-500/20 hover:bg-gray-500/80 px-2 rounded-md absolute top-1 right-1 cursor-pointer"
-			>
-				{copied ? <CopyCheck size={15} /> : <LucideCopy size={15} />}
-				<span>{copied ? "Copied" : "Copy"}</span>
-			</div>
+			{markdown.length > 0 && (
+				<div
+					onClick={handleCopy}
+					className="text-white opacity-20 hover:opacity-100 flex items-center gap-1 bg-gray-500/20 hover:bg-gray-500/80 px-2 rounded-md absolute top-1 right-1 cursor-pointer"
+				>
+					{copied ? (
+						<CopyCheck size={15} />
+					) : (
+						<LucideCopy size={15} />
+					)}
+					<span>{copied ? "Copied" : "Copy"}</span>
+				</div>
+			)}
 		</article>
 	);
 }
