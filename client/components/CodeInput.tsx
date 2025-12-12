@@ -67,6 +67,7 @@ export const CodeInput = ({
 		if (!values.includes(val)) setValues((prev) => [...prev, val]);
 		setInput("");
 		setOpen(false);
+		onSave({ rowId, values });
 	};
 
 	const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {

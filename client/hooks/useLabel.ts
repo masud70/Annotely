@@ -9,7 +9,7 @@ export default function useLabel(id: string) {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [processing, setProcessing] = useState<boolean>(false);
 	const [tokens, setTokens] = useState<Token[]>([]);
-	const [stayOnPage, setStayOnPage] = useState<boolean>(false);
+	const [stayOnPage, setStayOnPage] = useState<boolean>(true);
 
 	const parseRows = useCallback((keyCol: string, dSet: Dataset) => {
 		const m = new Map<string, Row>();

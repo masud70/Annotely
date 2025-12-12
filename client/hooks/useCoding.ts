@@ -11,7 +11,7 @@ export default function useCoding(id: string) {
 	const [tokens, setTokens] = useState<Token[]>([]);
 	const [codes, setCodes] = useState<string[]>([]);
 	const [themes, setThemes] = useState<string[]>([]);
-	const [stayOnPage, setStayOnPage] = useState<boolean>(false);
+	const [stayOnPage, setStayOnPage] = useState<boolean>(true);
 	const [notes, setNotes] = useState<string>("");
 
 	useEffect(() => {
